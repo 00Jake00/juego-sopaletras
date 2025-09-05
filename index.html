@@ -10,185 +10,121 @@
 
   <style>
     :root{
-      --primary:#d63384; /* magenta título */
-      --ink:#111;        /* texto */
-      --badge-bg:#fff;
-      --badge-bd:#eee;
-      --panel:#ffffffcc;
+      --magenta:#d63384;
+      --chip-found:#c3e6cb;
+      --chip-pending:#f8d7da;
+      --bg:#fff0f5;
+      --cell:#ffffff;
+      --cell-border:#cccccc;
+      --sel:#d63384;
+      --sel-text:#ffffff;
+      --found:#ffc0cb;
+
+      --bg-desktop: url("https://raw.githubusercontent.com/00Jake00/juego-sopaletras/main/DPCC_Campan%CC%83a%20Amor%20y%20Amistad_FondoJuegos_Fondo-H.jpg");
+      --bg-mobile:  url("https://raw.githubusercontent.com/00Jake00/juego-sopaletras/main/DPCC_Campan%CC%83a%20Amor%20y%20Amistad_FondoJuegos_Fondo-V.jpg");
     }
 
     *{ box-sizing: border-box; }
-    html, body{ height:100%; }
+    html, body { height: 100%; }
     body{
-      margin:0; 
-      min-height:100vh;
-      font-family: 'Comfortaa', system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial;
-      color:var(--ink);
-
-      /* Fondo por defecto (desktop) */
-      background: center / cover no-repeat fixed;
-      background-image: url('https://raw.githubusercontent.com/00Jake00/juego-sopaletras/main/DPCC_Campan%CC%83a%20Amor%20y%20Amistad_FondoJuegos_Fondo-H.jpg');
+      margin:0; padding:20px;
+      font-family: 'Comfortaa', system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      color:#111;
+      display:flex; flex-direction:column; align-items:center; gap:16px;
+      -webkit-user-select: none; user-select: none;
+      position: relative;
+      overflow-x: hidden;
+      background:#000;
     }
-    /* Fondo móvil */
+
+    body::before{
+      content:""; position: fixed; inset: 0; z-index: -1;
+      background-image: var(--bg-desktop);
+      background-size: cover; background-position: center; background-repeat: no-repeat;
+      background-attachment: fixed;
+    }
     @media (max-width: 575.98px){
-      body{
-        background-image: url('https://raw.githubusercontent.com/00Jake00/juego-sopaletras/main/DPCC_Campan%CC%83a%20Amor%20y%20Amistad_FondoJuegos_Fondo-V.jpg');
-      }
+      body::before{ background-image: var(--bg-mobile); background-attachment: scroll; }
     }
 
-    /* Logos de esquinas (mismo tamaño en todas las vistas) */
     .corner{
-      position: fixed;
-      top: 10px;
-      width: clamp(110px, 12vw, 160px);  /* tamaño fluido, sin reducir en móvil */
-      height: auto;
-      z-index: 50;
-      pointer-events: none;
-      user-select: none;
+      position: fixed; top: 10px; width: clamp(70px, 10vw, 120px);
+      height: auto; z-index: 50; pointer-events: none; user-select: none;
     }
     .logo-left{ left: 10px; }
     .logo-right{ right: 10px; }
-
     @media (min-width: 992px){
-      .corner{ top:16px; width: clamp(110px, 12vw, 160px); }
-      .logo-left{ left:16px; }
-      .logo-right{ right:16px; }
+      .corner{ top: 16px; width: clamp(110px, 12vw, 160px); }
+      .logo-left{ left:16px; } .logo-right{ right:16px; }
     }
 
-    /* Header más abajo para que no choque con los logos en móvil */
-    header{
-      text-align:center;
-      max-width:900px;
-      background: rgba(255,255,255,.82);
-      padding: 60px 12px 12px;  /* top alto para despejar logos */
-      border-radius: 12px;
-      margin: 100px auto 8px;   /* empuja todo hacia abajo en móvil */
-      backdrop-filter: blur(2px);
-    }
-    h1{
-      color: var(--primary);
-      margin: .25rem 0;
-      font-size: clamp(22px, 5.5vw, 40px);
-      line-height: 1.15;
-      text-shadow: none;
-    }
-    p.sub{
-      margin:0;
-      color:#000;
-      font-size: clamp(14px, 3.5vw, 18px);
-      opacity:.95;
-    }
+    header{ text-align:center; max-width:900px; background: rgba(255,255,255,.82); padding: 8px 12px; border-radius: 12px; }
+    h1{ margin:.25rem 0 .35rem; color: var(--magenta); font-weight:700; font-size: clamp(22px, 4.6vw, 40px); line-height:1.15; }
+    p.sub{ margin:0; color:#111; font-weight:600; font-size: clamp(14px, 2.8vw, 18px); }
 
-    /* HUD */
-    .hud{
-      display:flex; gap:10px; align-items:center; justify-content:center; flex-wrap:wrap;
-      margin: 10px auto 14px;
-      max-width: 900px;
-    }
+    .hud{ display:flex; gap:10px; flex-wrap:wrap; justify-content:center; font-size: clamp(12px, 2.6vw, 14px); }
     .badge{
-      background:var(--badge-bg);
-      border:1px solid var(--badge-bd);
-      padding:8px 12px;
-      border-radius:999px;
-      box-shadow:0 8px 30px rgba(0,0,0,.08);
-      font-weight:700;
+      background: rgba(255,255,255,.9); border:1px solid #eee;
+      padding:6px 10px; border-radius:999px; box-shadow:0 6px 24px rgba(0,0,0,.06);
+      font-weight:700; backdrop-filter: blur(2px);
     }
 
-    /* Grilla */
     .grid{
-      display:grid;
-      grid-template-columns: repeat(12, 1fr);
-      width: 100%;
-      max-width: 560px;
-      aspect-ratio: 1 / 1;
-      gap: 2px;
-      margin: 10px auto 16px;
-      touch-action: none;
-      background: rgba(255,255,255,.86);
-      padding: 8px;
-      border-radius: 12px;
-      box-shadow: 0 8px 30px rgba(0,0,0,.08);
+      display:grid; grid-template-columns: repeat(18, 1fr);
+      width: min(92vw, 700px); aspect-ratio: 1 / 1; gap: 2px; margin: 14px 0;
+      touch-action: none; -webkit-tap-highlight-color: transparent;
+      background: rgba(255,255,255,.85); border-radius: 12px; padding: 6px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.12); backdrop-filter: blur(2px);
     }
     .cell{
-      background-color: white;
-      border:1px solid #ccc;
-      display:flex; justify-content:center; align-items:center;
-      font-weight:800;
-      user-select:none;
-      cursor:pointer;
-      font-size: clamp(14px, 3.5vw, 20px);
-      border-radius:6px;
+      background: var(--cell); border: 1px solid var(--cell-border);
+      display:flex; align-items:center; justify-content:center;
+      font-weight:700; font-size: clamp(.72rem, 1.1vw + .55rem, 1.15rem);
+      line-height:1; cursor: pointer; transition: background .15s ease; border-radius: 6px;
     }
-    .cell.selected{ background-color:#d63384; color:#fff; }
-    .cell.found{ background-color:#ffc0cb; color:#fff; }
+    .cell.selected{ background: var(--sel); color: var(--sel-text); }
+    .cell.found{ background: var(--found); color:#fff; }
 
-    /* Panel lateral (palabras) */
     .panel{
-      margin: 0 auto 24px;
-      background: var(--panel);
-      padding: 14px;
-      border-radius: 12px;
-      box-shadow: 0 8px 30px rgba(0,0,0,.08);
-      width: 100%;
-      max-width: 900px;
-      text-align: center;
+      width: min(92vw, 700px); background: rgba(255,255,255,.9);
+      padding: 14px; border-radius: 12px; box-shadow: 0 6px 24px rgba(0,0,0,.08);
+      text-align:center; backdrop-filter: blur(2px);
     }
-    .word-list{
-      display:flex; flex-wrap:wrap; justify-content:center; gap:8px;
-    }
-    .word{
-      background:#f8d7da;
-      padding:6px 10px;
-      border-radius: 999px;
-      font-weight:700;
-      font-size: clamp(12px, 3.2vw, 16px);
-    }
-    .word.found{ background:#c3e6cb; }
+    .word-list{ display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin-bottom: 10px; }
+    .word{ background: var(--chip-pending); padding:6px 10px; border-radius: 999px; font-weight:700; font-size: clamp(12px, 2.6vw, 14px); }
+    .word.found{ background: var(--chip-found); }
 
-    /* Modal reflexión */
-    .modal{
-      position: fixed; inset:0;
-      display:none; place-items: center;
-      background: rgba(0,0,0,.55);
-      z-index: 100;
-      padding: 16px;
+    @media (max-width: 420px){
+      .grid{ gap: 1.5px; padding: 4px; }
     }
-    .modal.show{ display:grid; }
-    .modal-card{
-      max-width: 560px; width: 100%;
-      background: #fff;
-      color:#111;
-      border-radius: 14px;
-      padding: 18px 16px 14px;
-      box-shadow: 0 18px 50px rgba(0,0,0,.25);
-      position: relative;
+
+    /* Popup */
+    .pop{ position: fixed; inset: 0; background: rgba(0,0,0,.55); display: none; align-items: center; justify-content: center; z-index: 9999; padding: 16px; }
+    .pop.show{ display:flex; }
+    .pop-card{
+      background:#fff; color:#111; width: min(92vw, 560px);
+      border-radius: 16px; box-shadow: 0 16px 50px rgba(0,0,0,.25); padding: 18px;
+      max-height: 80vh; overflow:auto; animation: popIn .18s ease-out;
     }
-    .modal-card h3{
-      margin: 0 0 8px 0;
-      color: #d63384;
-      font-size: clamp(18px, 5vw, 24px);
-    }
-    .modal-card p{ margin:0; font-size: clamp(14px, 3.6vw, 18px); line-height:1.45; }
-    .modal-close{
-      position:absolute; top:8px; right:8px;
-      border:0; background:#eee; width:34px; height:34px; border-radius:50%;
-      font-weight:800; cursor:pointer;
-    }
+    @keyframes popIn{ from{ transform: scale(.96); opacity: .0 } to{ transform: scale(1); opacity:1 } }
+    .pop-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+    .pop-word{ font-size: clamp(20px, 4.5vw, 28px); font-weight:700; color: var(--magenta); margin:0; }
+    .pop-msg{ margin: 6px 0 0; font-size: clamp(14px, 2.8vw, 16px); line-height:1.45; }
+    .pop-close{ appearance:none; border:0; background:#111; color:#fff; padding:8px 12px; font-weight:700; border-radius:10px; cursor:pointer; }
+    .pop-overlay-dismiss{ position:absolute; inset:0; }
   </style>
 </head>
 <body>
-
-  <!-- Logos esquinas -->
-  <img class="corner logo-left"  src="https://raw.githubusercontent.com/00Jake00/juego-sopaletras/main/LOGO.png" alt="Logo campaña">
-  <img class="corner logo-right" src="https://raw.githubusercontent.com/00Jake00/juego-sopaletras/main/BTA.png"  alt="Logo aliado">
+  <img class="corner logo-left"  src="https://raw.githubusercontent.com/00Jake00/juego-sopaletras/main/LOGO.png" alt="" aria-hidden="true">
+  <img class="corner logo-right" src="https://raw.githubusercontent.com/00Jake00/juego-sopaletras/main/BTA.png"  alt="" aria-hidden="true">
 
   <header>
     <h1>Palabras que construyen Amor y Amistad</h1>
-    <p class="sub">Encuentra las parejas: <strong>palabra</strong> + <strong>mensaje</strong> que construyen vínculos sanos.</p>
+    <p class="sub">Encuentra las parejas: palabra + mensaje que construyen vínculos sanos.</p>
   </header>
 
   <div class="hud" role="status" aria-live="polite">
-    <span class="badge">Encontradas: <strong id="found">0</strong>/<strong id="total">0</strong></span>
+    <span class="badge">Encontradas: <strong id="foundCount">0</strong>/11</span>
   </div>
 
   <div class="grid" id="sopa"></div>
@@ -197,269 +133,231 @@
     <div class="word-list" id="lista-palabras"></div>
   </div>
 
-  <!-- Modal reflexión -->
-  <div class="modal" id="modal">
-    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modal-title">
-      <button class="modal-close" id="modalClose" aria-label="Cerrar">×</button>
-      <h3 id="modal-title">¡Palabra encontrada!</h3>
-      <p id="modal-text"></p>
+  <!-- Popup -->
+  <div class="pop" id="pop" role="dialog" aria-modal="true">
+    <div class="pop-overlay-dismiss" data-close="1"></div>
+    <div class="pop-card">
+      <div class="pop-head">
+        <h2 class="pop-word" id="popWord">Palabra</h2>
+        <button class="pop-close" type="button" id="popClose">X</button>
+      </div>
+      <p class="pop-msg" id="popMsg"></p>
     </div>
   </div>
 
   <script>
-    /* ======= Datos ======= */
-    const palabras = [
-      { texto:"CONVIVENCIA",      reflexion:"La mejor celebración es la que se vive pacíficamente.", coords:[] },
-      { texto:"AMISTAD",          reflexion:"Compartir con respeto y cuidado fortalece la amistad.", coords:[] },
-      { texto:"CORRESPONSABILIDAD",reflexion:"El bienestar se construye cuidando de nosotros y de los demás.", coords:[] },
-      { texto:"UNION",            reflexion:"Celebremos en paz: sin violencia, sin drama, solo unión.", coords:[] },
-      { texto:"RESPETO",          reflexion:"Si hay golpe y agresión, se daña la celebración.", coords:[] },
-      { texto:"SOLIDARIDAD",      reflexion:"Ayudar y acompañar también es celebrar el amor y la amistad.", coords:[] },
-      { texto:"ALEGRIA",          reflexion:"Celebremos con alegría, responsabilidad y empatía en cada decisión.", coords:[] },
-      { texto:"EMOCION",          reflexion:"Gestiona tus emociones: evita las riñas, que el amor sea la celebración.", coords:[] },
-      { texto:"EMPATIA",          reflexion:"Celebrar con empatía: comprender y cuidar hace la fiesta más bonita.", coords:[] },
-      { texto:"AUTORREGULACION",  reflexion:"Controla tus actos para que la celebración termine sin nada que lamentar.", coords:[] },
-      { texto:"AMOR",             reflexion:"Cuidar cómo celebramos es cuidar la vida de quienes amamos.", coords:[] }
+    const TAM = 18;
+    const grid = Array.from({ length: TAM }, () => Array(TAM).fill(""));
+
+    const PALABRAS = [
+      { texto: "CONVIVENCIA", reflexion: "La mejor celebración es la que se vive pacíficamente.", coords: [] },
+      { texto: "AMISTAD", reflexion: "Compartir con respeto y cuidado fortalece la amistad.", coords: [] },
+      { texto: "CORRESPONSABILIDAD", reflexion: "El bienestar se construye cuidando de nosotros y de los demás.", coords: [] },
+      { texto: "UNION", reflexion: "Celebremos en paz: sin violencia, sin drama, solo unión.", coords: [] },
+      { texto: "RESPETO", reflexion: "Si hay golpe y agresión, se daña la celebración.", coords: [] },
+      { texto: "SOLIDARIDAD", reflexion: "Ayudar y acompañar también es celebrar el amor y la amistad.", coords: [] },
+      { texto: "ALEGRIA", reflexion: "Celebremos con alegría, responsabilidad y empatía en cada decisión.", coords: [] },
+      { texto: "EMOCION", reflexion: "Gestiona tus emociones: evita las riñas, que el amor sea la celebración.", coords: [] },
+      { texto: "EMPATIA", reflexion: "Celebrar con empatía: comprender y cuidar hace la fiesta más bonita.", coords: [] },
+      { texto: "AUTORREGULACION", reflexion: "Controla tus actos para que la celebración termine sin nada que lamentar.", coords: [] },
+      { texto: "AMOR", reflexion: "Cuidar cómo celebramos es cuidar la vida de quienes amamos.", coords: [] }
     ];
 
-    const tam = 12;
-    const grid = Array.from({ length: tam }, () => Array(tam).fill(""));
-    const sopa = document.getElementById("sopa");
-    const lista = document.getElementById("lista-palabras");
-    const foundEl = document.getElementById("found");
-    const totalEl = document.getElementById("total");
-    const modal = document.getElementById("modal");
-    const modalText = document.getElementById("modal-text");
-    const modalClose = document.getElementById("modalClose");
-
-    // Direcciones (incluye diagonales)
-    const direcciones = [
-      [0, 1], [1, 0], [1, 1], [-1, 1],
-      [0, -1], [-1, 0], [-1, -1], [1, -1]
+    const DIRECCIONES = [
+      [0,1],[1,0],[1,1],[-1,1],
+      [0,-1],[-1,0],[-1,-1],[1,-1]
     ];
+    const ALFABETO = "ABCDEFGHIJKLMNÑOPQRSTUVWXYZ";
 
-    function puedeColocar(palabra, row, col, dx, dy) {
-      for (let i = 0; i < palabra.length; i++) {
-        const r = row + i * dy;
-        const c = col + i * dx;
-        if (r < 0 || r >= tam || c < 0 || c >= tam || (grid[r][c] && grid[r][c] !== palabra[i])) return false;
+    const $ = (sel, ctx=document) => ctx.querySelector(sel);
+
+    function puedeColocar(palabra,row,col,dx,dy){
+      for(let i=0;i<palabra.length;i++){
+        const r=row+i*dy,c=col+i*dx;
+        if(r<0||r>=TAM||c<0||c>=TAM|| (grid[r][c] && grid[r][c]!==palabra[i])) return false;
       }
       return true;
     }
-
-    function colocarPalabra(p) {
-      let placed = false;
-      let intentos = 0;
-      while (!placed && intentos < 400) {
-        const dir = direcciones[Math.floor(Math.random() * direcciones.length)];
-        const dx = dir[0];
-        const dy = dir[1];
-        const row = Math.floor(Math.random() * tam);
-        const col = Math.floor(Math.random() * tam);
-        if (puedeColocar(p.texto, row, col, dx, dy)) {
-          const coords = [];
-          for (let i = 0; i < p.texto.length; i++) {
-            const r = row + i * dy;
-            const c = col + i * dx;
-            grid[r][c] = p.texto[i];
-            coords.push(`${r}-${c}`);
+    function colocarPalabra(p){
+      let placed=false,int=0;
+      while(!placed&&int<1500){
+        const [dx,dy]=DIRECCIONES[Math.floor(Math.random()*DIRECCIONES.length)];
+        const row=Math.floor(Math.random()*TAM), col=Math.floor(Math.random()*TAM);
+        if(puedeColocar(p.texto,row,col,dx,dy)){
+          const coords=[];
+          for(let i=0;i<p.texto.length;i++){
+            const r=row+i*dy,c=col+i*dx;
+            grid[r][c]=p.texto[i]; coords.push(`${r}-${c}`);
           }
-          p.coords = coords;
-          placed = true;
+          p.coords=coords; placed=true;
         }
-        intentos++;
+        int++;
       }
-      if (!placed) console.warn(`No se pudo colocar: ${p.texto}`);
+      if(!placed) console.warn("No se pudo colocar:", p.texto);
     }
-
-    function rellenarLetras() {
-      const letras = "ABCDEFGHIJKLMNÑOPQRSTUVWXYZ";
-      for (let i = 0; i < tam; i++) {
-        for (let j = 0; j < tam; j++) {
-          if (!grid[i][j]) {
-            grid[i][j] = letras[Math.floor(Math.random() * letras.length)];
+    function rellenarLetras(){
+      for(let i=0;i<TAM;i++){
+        for(let j=0;j<TAM;j++){
+          if(!grid[i][j]){
+            grid[i][j]=ALFABETO[Math.floor(Math.random()*ALFABETO.length)];
           }
         }
       }
     }
 
-    function renderSopa() {
-      sopa.innerHTML = "";
-      for (let i = 0; i < tam; i++) {
-        for (let j = 0; j < tam; j++) {
-          const div = document.createElement("div");
-          div.className = "cell";
-          div.id = `${i}-${j}`;
-          div.textContent = grid[i][j];
-          sopa.appendChild(div);
+    const sopa=$("#sopa"), lista=$("#lista-palabras"), foundCountEl=$("#foundCount");
+    function renderSopa(){
+      sopa.innerHTML="";
+      for(let i=0;i<TAM;i++){
+        for(let j=0;j<TAM;j++){
+          const d=document.createElement("div");
+          d.className="cell"; d.id=`${i}-${j}`; d.textContent=grid[i][j];
+          sopa.appendChild(d);
         }
       }
     }
-
-    function mostrarPalabras() {
-      lista.innerHTML = "";
-      palabras.forEach(p => {
-        const span = document.createElement("span");
-        span.className = "word";
-        span.id = `palabra-${p.texto}`;
-        span.textContent = p.texto;
-        lista.appendChild(span);
+    function mostrarPalabras(){
+      lista.innerHTML="";
+      PALABRAS.forEach(p=>{
+        const s=document.createElement("span");
+        s.className="word"; s.id=`palabra-${p.texto}`; s.textContent=p.texto;
+        lista.appendChild(s);
       });
     }
 
-    // ===== Selección con tolerancia suave =====
-    let seleccion = [];
-    let seleccionActiva = false;
-
-    function limpiarSeleccion() {
-      document.querySelectorAll(".cell.selected").forEach(c => c.classList.remove("selected"));
+    // ===== Popup =====
+    const pop=$("#pop"), popWord=$("#popWord"), popMsg=$("#popMsg"), popClose=$("#popClose");
+    function showPopup(word,msg){
+      popWord.textContent=word; popMsg.textContent=msg;
+      pop.classList.add("show"); popClose.focus();
+      document.addEventListener("keydown",escHandler);
     }
-    function marcarSeleccion() {
-      limpiarSeleccion();
-      seleccion.forEach(id => {
-        const el = document.getElementById(id);
-        el && el.classList.add("selected");
-      });
+    function hidePopup(){
+      pop.classList.remove("show");
+      document.removeEventListener("keydown",escHandler);
     }
+    function escHandler(e){ if(e.key==="Escape") hidePopup(); }
+    popClose.addEventListener("click",hidePopup);
+    pop.addEventListener("click",(e)=>{ if(e.target.dataset.close) hidePopup(); });
 
-    function idFromPoint(x, y){
-      const el = document.elementFromPoint(x, y);
-      if (el && el.classList.contains("cell")) return el.id;
-      return null;
-    }
+    // ===== Selección con “imán” a 8 direcciones =====
+    let startCell=null, seleccion=[], seleccionActiva=false, totalEncontradas=0;
 
-    // Permite pequeños “saltos” si el dedo no pasa por todas las celdas exactas (tolerancia = 1)
-    function expandirLineaSiCasiRecta(path){
-      if(path.length < 2) return path;
-      const coords = path.map(id => id.split('-').map(Number));
-      const [r0,c0] = coords[0];
-      const [r1,c1] = coords[coords.length-1];
+    function idToRC(id){ const [r,c]=id.split("-").map(Number); return {r,c}; }
+    function clampDir(n){ return n===0?0:(n>0?1:-1); }
 
-      const dr = Math.sign(r1 - r0);
-      const dc = Math.sign(c1 - c0);
+    function buildSnappedPath(startId, currentId){
+      const {r:rs,c:cs}=idToRC(startId);
+      const {r:rc,c:cc}=idToRC(currentId);
+      const dx = clampDir(cc - cs);
+      const dy = clampDir(rc - rs);
+      if(dx===0 && dy===0) return [startId];
 
-      // Si no es claramente en línea (h, v, diag), no expandimos
-      if(!((dr === 0 && dc !== 0) || (dc === 0 && dr !== 0) || (Math.abs(dr) === 1 && Math.abs(dc) === 1))){
-        return path;
+      const len = Math.max(Math.abs(cc-cs), Math.abs(rc-rs));
+      const path = [];
+      for(let i=0;i<=len;i++){
+        const r = rs + dy*i;
+        const c = cs + dx*i;
+        if(r<0||r>=TAM||c<0||c>=TAM) break;
+        path.push(`${r}-${c}`);
       }
-
-      // Reconstruye la línea “ideal” entre extremos
-      const result = [];
-      let r = r0, c = c0;
-      result.push(`${r}-${c}`);
-      while(r !== r1 || c !== c1){
-        r += dr; c += dc;
-        if(r < 0 || r >= tam || c < 0 || c >= tam) break;
-        result.push(`${r}-${c}`);
-      }
-      return result;
+      return path;
     }
 
-    function empezarSeleccionBase(id){
-      seleccionActiva = true;
-      seleccion = [];
-      limpiarSeleccion();
-      if(id) { seleccion.push(id); marcarSeleccion(); }
-    }
-    function arrastrarSeleccionBase(id){
-      if(!seleccionActiva || !id) return;
-      if(seleccion[seleccion.length-1] === id) return;
-      seleccion.push(id);
-      // “Suaviza” a una línea ideal entre el primero y el último
-      seleccion = expandirLineaSiCasiRecta(seleccion);
-      marcarSeleccion();
-    }
-    function finalizarSeleccion(){
-      seleccionActiva = false;
-      if(seleccion.length === 0) return;
-
-      const palabraActual = seleccion.map(id => document.getElementById(id).textContent).join("");
-      const match = palabras.find(p => {
-        // coincidencia exacta (mismo orden y mismas coords)
-        const exact = p.texto === palabraActual && p.coords.length === seleccion.length && p.coords.every((c, i) => seleccion[i] === c);
-        if(exact) return true;
-
-        // coincidencia en reversa
-        const rev = [...seleccion].reverse();
-        const palabraRev = rev.map(id => document.getElementById(id).textContent).join("");
-        const exactRev = p.texto === palabraRev && p.coords.length === rev.length && p.coords.every((c, i) => rev[i] === c);
-        return exactRev;
+    function paintSelection(ids){
+      // limpia
+      document.querySelectorAll(".cell.selected").forEach(c=>c.classList.remove("selected"));
+      // pinta
+      ids.forEach(id=>{
+        const el=document.getElementById(id);
+        if(el && !el.classList.contains("found")) el.classList.add("selected");
       });
+    }
 
-      if (match) {
-        match.coords.forEach(id => {
-          const cell = document.getElementById(id);
-          cell && cell.classList.add("found");
+    function verificarSeleccion(){
+      if(seleccion.length<2){ paintSelection([]); seleccion=[]; return; }
+
+      const txt = seleccion.map(id=>document.getElementById(id).textContent).join("");
+      const txtInv = [...txt].reverse().join("");
+      const coordsInv = [...seleccion].reverse();
+
+      const hit = PALABRAS.find(p =>
+        seleccion.length===p.coords.length &&
+        (txt===p.texto && p.coords.every((c,i)=>c===seleccion[i]) ||
+         txtInv===p.texto && p.coords.every((c,i)=>c===coordsInv[i]))
+      );
+
+      if(hit){
+        hit.coords.forEach(id=>{
+          const cell=document.getElementById(id);
+          cell.classList.remove("selected"); cell.classList.add("found");
         });
-        document.getElementById(`palabra-${match.texto}`).classList.add("found");
-        showModal(match.reflexion);
-        updateFoundCount();
-      } else {
-        limpiarSeleccion();
+        document.getElementById(`palabra-${hit.texto}`).classList.add("found");
+        totalEncontradas++; foundCountEl.textContent=totalEncontradas;
+        showPopup(hit.texto, hit.reflexion);
       }
-      seleccion = [];
+      paintSelection([]); seleccion=[];
     }
 
-    function showModal(text){
-      modalText.textContent = text;
-      modal.classList.add('show');
+    function empezar(e){
+      const cell = e.target.closest(".cell");
+      if(!cell) return;
+      seleccionActiva=true;
+      startCell = cell.id;
+      seleccion = [startCell];
+      paintSelection(seleccion);
     }
-    function hideModal(){
-      modal.classList.remove('show');
+    function mover(e){
+      if(!seleccionActiva || !startCell) return;
+      const cell = e.target.closest(".cell");
+      if(!cell) return;
+      const path = buildSnappedPath(startCell, cell.id);
+      seleccion = path;
+      paintSelection(seleccion);
     }
-    modal.addEventListener('click', (e)=>{
-      if(e.target === modal) hideModal();
-    });
-    modalClose.addEventListener('click', hideModal);
-
-    // Eventos puntero/ratón
-    sopa.addEventListener("mousedown", (e)=>{
-      const target = e.target.closest(".cell");
-      empezarSeleccionBase(target && target.id);
-    });
-    sopa.addEventListener("mousemove", (e)=>{
+    function fin(){
       if(!seleccionActiva) return;
-      const target = e.target.closest(".cell");
-      arrastrarSeleccionBase(target && target.id);
-    });
-    window.addEventListener("mouseup", finalizarSeleccion);
+      seleccionActiva=false;
+      verificarSeleccion();
+    }
 
-    // Touch
-    sopa.addEventListener("touchstart", (e)=>{
+    function startTouch(e){
       e.preventDefault();
-      const id = idFromPoint(e.touches[0].clientX, e.touches[0].clientY);
-      empezarSeleccionBase(id);
-    }, {passive:false});
-    sopa.addEventListener("touchmove", (e)=>{
+      const t=document.elementFromPoint(e.touches[0].clientX,e.touches[0].clientY);
+      if(!(t && t.classList.contains("cell"))) return;
+      seleccionActiva=true; startCell=t.id; seleccion=[startCell]; paintSelection(seleccion);
+    }
+    function moveTouch(e){
       e.preventDefault();
-      const id = idFromPoint(e.touches[0].clientX, e.touches[0].clientY);
-      arrastrarSeleccionBase(id);
-    }, {passive:false});
-    sopa.addEventListener("touchend", (e)=>{
-      e.preventDefault();
-      finalizarSeleccion();
-    }, {passive:false});
+      if(!seleccionActiva || !startCell) return;
+      const t=document.elementFromPoint(e.touches[0].clientX,e.touches[0].clientY);
+      if(!(t && t.classList.contains("cell"))) return;
+      const path = buildSnappedPath(startCell, t.id);
+      seleccion = path;
+      paintSelection(seleccion);
+    }
 
-    function updateFoundCount(){
-      const total = palabras.length;
-      const found = palabras.filter(p => {
-        const chip = document.getElementById(`palabra-${p.texto}`);
-        return chip && chip.classList.contains('found');
-      }).length;
-      foundEl.textContent = found;
-      totalEl.textContent = total;
+    function eventos(){
+      // mouse
+      sopa.addEventListener("mousedown", empezar);
+      sopa.addEventListener("mousemove", mover);
+      document.addEventListener("mouseup", fin);
+      // touch
+      sopa.addEventListener("touchstart", startTouch, {passive:false});
+      sopa.addEventListener("touchmove",  moveTouch,  {passive:false});
+      sopa.addEventListener("touchend",   fin);
+      sopa.addEventListener("touchcancel",fin);
     }
 
     // Init
-    palabras.forEach(p => colocarPalabra(p));
+    PALABRAS.forEach(p=>colocarPalabra(p));
     rellenarLetras();
     renderSopa();
     mostrarPalabras();
-    updateFoundCount();
+    eventos();
   </script>
 </body>
 </html>
-
 
 
 
