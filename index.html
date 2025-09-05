@@ -47,6 +47,18 @@
       font-size: clamp(14px, 2.8vw, 18px);
     }
 
+    /* HUD */
+    .hud{
+      display:flex; gap:10px; flex-wrap:wrap; justify-content:center;
+      font-size: clamp(12px, 2.6vw, 14px);
+    }
+    .badge{
+      background:#fff; border:1px solid #eee;
+      padding:6px 10px; border-radius:999px;
+      box-shadow:0 6px 24px rgba(0,0,0,.06);
+      font-weight:700;
+    }
+
     /* Tablero */
     .grid{
       display:grid;
@@ -72,7 +84,7 @@
     .cell.selected{ background: var(--sel); color: var(--sel-text); }
     .cell.found{ background: var(--found); color:#fff; }
 
-    /* Panel lateral inferior */
+    /* Panel */
     .panel{
       width: min(92vw, 700px);
       background:#fff;
@@ -92,29 +104,50 @@
       font-weight:700;
       font-size: clamp(12px, 2.6vw, 14px);
     }
-    .word.found{
-      background: var(--chip-found);
-    }
-    .reflexion{
-      margin-top: 10px;
-      font-style: italic;
-      font-size: clamp(13px, 2.8vw, 16px);
-    }
-
-    /* HUD simple */
-    .hud{
-      display:flex; gap:10px; flex-wrap:wrap; justify-content:center;
-      font-size: clamp(12px, 2.6vw, 14px);
-    }
-    .badge{
-      background:#fff; border:1px solid #eee;
-      padding:6px 10px; border-radius:999px;
-      box-shadow:0 6px 24px rgba(0,0,0,.06);
-      font-weight:700;
-    }
+    .word.found{ background: var(--chip-found); }
+    .reflexion{ display:none; } /* ya no mostramos texto fijo abajo; ahora va en popup */
 
     @media (max-width: 420px){
       .grid{ gap: 1.5px; }
+    }
+
+    /* ===== Popup accesible ===== */
+    .pop{
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.55);
+      display: none;
+      align-items: center; justify-content: center;
+      z-index: 9999;
+      padding: 16px;
+      overscroll-behavior: contain;
+    }
+    .pop.show{ display:flex; }
+    .pop-card{
+      background:#fff; color:#111;
+      width: min(92vw, 560px);
+      border-radius: 16px;
+      box-shadow: 0 16px 50px rgba(0,0,0,.25);
+      padding: 18px;
+      max-height: 80vh; overflow:auto;
+      animation: popIn .18s ease-out;
+    }
+    @keyframes popIn{ from{ transform: scale(.96); opacity: .0 } to{ transform: scale(1); opacity:1 } }
+    .pop-head{
+      display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:8px;
+    }
+    .pop-title{
+      margin:0; font-size: clamp(18px, 3.8vw, 22px); font-weight:700; color: var(--magenta);
+    }
+    .pop-msg{
+      margin: 6px 0 0; font-size: clamp(14px, 2.8vw, 16px); line-height:1.45;
+    }
+    .pop-close{
+      appearance:none; border:0; background:#111; color:#fff;
+      padding:8px 12px; font-weight:700; border-radius:10px; cursor:pointer;
+    }
+    .pop-overlay-dismiss{ position:absolute; inset:0; }
+    @media (prefers-reduced-motion: reduce){
+      .pop-card{ animation: none; }
     }
   </style>
 </head>
@@ -135,12 +168,24 @@
     <div class="reflexion" id="reflexion"></div>
   </div>
 
+  <!-- ===== Popup ===== -->
+  <div class="pop" id="pop" role="dialog" aria-modal="true" aria-labelledby="popTitle" aria-describedby="popMsg">
+    <div class="pop-overlay-dismiss" data-close="1"></div>
+    <div class="pop-card">
+      <div class="pop-head">
+        <h2 class="pop-title" id="popTitle">¡Palabra encontrada!</h2>
+        <button class="pop-close" type="button" id="popClose">Cerrar</button>
+      </div>
+      <p class="pop-msg" id="popMsg"></p>
+    </div>
+  </div>
+
   <script>
     /* ====== Configuración ====== */
     const TAM = 18; // 18x18 para palabras largas
     const grid = Array.from({ length: TAM }, () => Array(TAM).fill(""));
 
-    // Lista de palabras (sin tildes) + reflexiones EXACTAS que enviaste
+    // Lista de palabras (sin tildes) + reflexiones EXACTAS
     const PALABRAS = [
       { texto: "CONVIVENCIA", reflexion: "La mejor celebración es la que se vive pacíficamente.", coords: [] },
       { texto: "AMISTAD", reflexion: "Compartir con respeto y cuidado fortalece la amistad.", coords: [] },
@@ -180,7 +225,7 @@
     function colocarPalabra(p) {
       let placed = false;
       let intentos = 0;
-      const MAX_INTENTOS = 800; // subimos intentos por palabras largas
+      const MAX_INTENTOS = 800;
 
       while (!placed && intentos < MAX_INTENTOS) {
         const [dx, dy] = DIRECCIONES[Math.floor(Math.random() * DIRECCIONES.length)];
@@ -215,7 +260,6 @@
 
     const sopa = $("#sopa");
     const lista = $("#lista-palabras");
-    const reflexion = $("#reflexion");
     const foundCountEl = $("#foundCount");
 
     function renderSopa() {
@@ -237,12 +281,38 @@
         const span = document.createElement("span");
         span.className = "word";
         span.id = `palabra-${p.texto}`;
-        span.textContent = p.texto; // sin tildes para coincidir con grilla
+        span.textContent = p.texto;
         lista.appendChild(span);
       });
     }
 
-    /* ====== Selección con ratón/touch (arrastre, soporta diagonal) ====== */
+    /* ====== Popup ====== */
+    const pop = $("#pop");
+    const popMsg = $("#popMsg");
+    const popClose = $("#popClose");
+
+    function showPopup(msg){
+      popMsg.textContent = msg;
+      pop.classList.add("show");
+
+      // Auto-cierre (puedes desactivar comentando estas 2 líneas)
+      clearTimeout(showPopup._t);
+      showPopup._t = setTimeout(hidePopup, 2200); // <-- cambia el tiempo o comenta para quitar autocierre
+
+      // Enfocar botón para accesibilidad
+      popClose.focus();
+      document.addEventListener("keydown", onEscOnce, { once:true });
+    }
+    function hidePopup(){
+      pop.classList.remove("show");
+    }
+    function onEscOnce(e){
+      if(e.key === "Escape") hidePopup();
+    }
+    pop.addEventListener("click", (e)=>{ if(e.target.dataset.close) hidePopup(); });
+    popClose.addEventListener("click", hidePopup);
+
+    /* ====== Selección con ratón/touch ====== */
     let seleccion = [];
     let seleccionActiva = false;
     let totalEncontradas = 0;
@@ -250,7 +320,7 @@
     function seleccionarCelda(el) {
       if (!el || !el.classList.contains("cell")) return;
       const id = el.id;
-      if (seleccion[seleccion.length-1] === id) return; // evitar duplicar última
+      if (seleccion[seleccion.length-1] === id) return; // evitar repetir última
       el.classList.add("selected");
       seleccion.push(id);
     }
@@ -269,7 +339,9 @@
       const chip = document.getElementById(`palabra-${pal.texto}`);
       chip.classList.add("found");
 
-      reflexion.textContent = pal.reflexion;
+      // Mostrar reflexión en popup
+      showPopup(pal.reflexion);
+
       totalEncontradas++;
       foundCountEl.textContent = totalEncontradas;
     }
@@ -277,12 +349,10 @@
     function verificarSeleccion() {
       if (seleccion.length < 2) { limpiarSeleccion(); return; }
 
-      // Construimos la palabra y comparamos con cada PALABRA y sus coords
       const textoSel = seleccion.map(id => document.getElementById(id).textContent).join("");
 
       const hit = PALABRAS.find(p => {
         if (seleccion.length !== p.coords.length) return false;
-        // Debe coincidir la cadena y el recorrido exacto (dirección y orden)
         const coincideTexto = (textoSel === p.texto);
         const coincideCoords = p.coords.every((c, i) => c === seleccion[i]);
         return coincideTexto && coincideCoords;
@@ -291,7 +361,7 @@
       if (hit) {
         marcarEncontrada(hit);
       } else {
-        // Intento inverso: si el usuario arrastró al revés
+        // Intento inverso
         const textoSelInv = [...textoSel].reverse().join("");
         const coordsInv = [...seleccion].reverse();
         const hitInv = PALABRAS.find(p => {
@@ -305,7 +375,6 @@
         }
       }
 
-      // Si no hubo acierto, quitamos selección visual
       limpiarSeleccion();
     }
 
