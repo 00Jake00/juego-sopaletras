@@ -20,11 +20,8 @@
       --sel-text:#ffffff;
       --found:#ffc0cb;
 
-      /* Imágenes (usar RAW de GitHub) */
       --bg-desktop: url("https://raw.githubusercontent.com/00Jake00/juego-sopaletras/main/DPCC_Campan%CC%83a%20Amor%20y%20Amistad_FondoJuegos_Fondo-H.jpg");
       --bg-mobile:  url("https://raw.githubusercontent.com/00Jake00/juego-sopaletras/main/DPCC_Campan%CC%83a%20Amor%20y%20Amistad_FondoJuegos_Fondo-V.jpg");
-      --logo-left:  url("https://raw.githubusercontent.com/00Jake00/juego-sopaletras/main/LOGO.png");
-      --logo-right: url("https://raw.githubusercontent.com/00Jake00/juego-sopaletras/main/BTA.png");
     }
 
     *{ box-sizing: border-box; }
@@ -37,177 +34,87 @@
       -webkit-user-select: none; user-select: none;
       position: relative;
       overflow-x: hidden;
-      background: #000; /* fallback */
+      background:#000;
     }
 
-    /* Fondo a pantalla completa con dos variantes */
     body::before{
-      content:"";
-      position: fixed;
-      inset: 0;
-      z-index: -1;
+      content:""; position: fixed; inset: 0; z-index: -1;
       background-image: var(--bg-desktop);
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
-      /* si quieres efecto parallax fijo en desktop, deja esta línea;
-         si en iOS te saltan glitches, cámbiala a "scroll" */
+      background-size: cover; background-position: center; background-repeat: no-repeat;
       background-attachment: fixed;
     }
     @media (max-width: 575.98px){
-      body::before{
-        background-image: var(--bg-mobile);
-        background-attachment: scroll; /* mejor rendimiento en móviles */
-      }
+      body::before{ background-image: var(--bg-mobile); background-attachment: scroll; }
     }
 
-    /* Logos en las esquinas (decorativos, no bloquean toques) */
     .corner{
-      position: fixed;
-      top: 10px;
-      width: clamp(70px, 10vw, 120px);
-      height: auto;
-      z-index: 50;
-      pointer-events: none; /* no bloquea selección de letras debajo */
-      user-select: none;
-      image-rendering: -webkit-optimize-contrast;
+      position: fixed; top: 10px; width: clamp(70px, 10vw, 120px);
+      height: auto; z-index: 50; pointer-events: none; user-select: none;
     }
     .logo-left{ left: 10px; }
     .logo-right{ right: 10px; }
-
     @media (min-width: 992px){
-      .corner{
-        top: 16px;
-        width: clamp(110px, 12vw, 160px);
-      }
-      .logo-left{ left: 16px; }
-      .logo-right{ right: 16px; }
+      .corner{ top: 16px; width: clamp(110px, 12vw, 160px); }
+      .logo-left{ left:16px; } .logo-right{ right:16px; }
     }
 
     header{ text-align:center; max-width:900px; background: rgba(255,255,255,.82); padding: 8px 12px; border-radius: 12px; }
-    h1{
-      margin:.25rem 0 .35rem;
-      color: var(--magenta);
-      font-weight:700;
-      font-size: clamp(22px, 4.6vw, 40px);
-      line-height:1.15;
-    }
-    p.sub{
-      margin:0;
-      color:#111;
-      font-weight:600;
-      font-size: clamp(14px, 2.8vw, 18px);
-    }
+    h1{ margin:.25rem 0 .35rem; color: var(--magenta); font-weight:700; font-size: clamp(22px, 4.6vw, 40px); line-height:1.15; }
+    p.sub{ margin:0; color:#111; font-weight:600; font-size: clamp(14px, 2.8vw, 18px); }
 
-    .hud{
-      display:flex; gap:10px; flex-wrap:wrap; justify-content:center;
-      font-size: clamp(12px, 2.6vw, 14px);
-    }
+    .hud{ display:flex; gap:10px; flex-wrap:wrap; justify-content:center; font-size: clamp(12px, 2.6vw, 14px); }
     .badge{
-      background: rgba(255,255,255,.9);
-      border:1px solid #eee;
-      padding:6px 10px; border-radius:999px;
-      box-shadow:0 6px 24px rgba(0,0,0,.06);
-      font-weight:700;
-      backdrop-filter: blur(2px);
+      background: rgba(255,255,255,.9); border:1px solid #eee;
+      padding:6px 10px; border-radius:999px; box-shadow:0 6px 24px rgba(0,0,0,.06);
+      font-weight:700; backdrop-filter: blur(2px);
     }
 
     .grid{
-      display:grid;
-      grid-template-columns: repeat(18, 1fr);
-      width: min(92vw, 700px);
-      aspect-ratio: 1 / 1;
-      gap: 2px;
-      margin: 14px 0;
-      touch-action: none;
-      -webkit-tap-highlight-color: transparent;
-      background: rgba(255,255,255,.85);
-      border-radius: 12px;
-      padding: 6px;
-      box-shadow: 0 10px 30px rgba(0,0,0,.12);
-      backdrop-filter: blur(2px);
+      display:grid; grid-template-columns: repeat(18, 1fr);
+      width: min(92vw, 700px); aspect-ratio: 1 / 1; gap: 2px; margin: 14px 0;
+      touch-action: none; -webkit-tap-highlight-color: transparent;
+      background: rgba(255,255,255,.85); border-radius: 12px; padding: 6px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.12); backdrop-filter: blur(2px);
     }
     .cell{
-      background: var(--cell);
-      border: 1px solid var(--cell-border);
+      background: var(--cell); border: 1px solid var(--cell-border);
       display:flex; align-items:center; justify-content:center;
-      font-weight: 700;
-      font-size: clamp(.72rem, 1.1vw + .55rem, 1.15rem);
-      line-height:1;
-      cursor: pointer;
-      transition: background .15s ease;
-      border-radius: 6px;
+      font-weight:700; font-size: clamp(.72rem, 1.1vw + .55rem, 1.15rem);
+      line-height:1; cursor: pointer; transition: background .15s ease; border-radius: 6px;
     }
     .cell.selected{ background: var(--sel); color: var(--sel-text); }
     .cell.found{ background: var(--found); color:#fff; }
 
     .panel{
-      width: min(92vw, 700px);
-      background: rgba(255,255,255,.9);
-      padding: 14px;
-      border-radius: 12px;
-      box-shadow: 0 6px 24px rgba(0,0,0,.08);
-      text-align:center;
-      backdrop-filter: blur(2px);
+      width: min(92vw, 700px); background: rgba(255,255,255,.9);
+      padding: 14px; border-radius: 12px; box-shadow: 0 6px 24px rgba(0,0,0,.08);
+      text-align:center; backdrop-filter: blur(2px);
     }
-    .word-list{
-      display:flex; flex-wrap:wrap; gap:10px; justify-content:center;
-      margin-bottom: 10px;
-    }
-    .word{
-      background: var(--chip-pending);
-      padding:6px 10px;
-      border-radius: 999px;
-      font-weight:700;
-      font-size: clamp(12px, 2.6vw, 14px);
-    }
+    .word-list{ display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin-bottom: 10px; }
+    .word{ background: var(--chip-pending); padding:6px 10px; border-radius: 999px; font-weight:700; font-size: clamp(12px, 2.6vw, 14px); }
     .word.found{ background: var(--chip-found); }
 
     @media (max-width: 420px){
       .grid{ gap: 1.5px; padding: 4px; }
     }
 
-    /* ===== Popup ===== */
-    .pop{
-      position: fixed; inset: 0;
-      background: rgba(0,0,0,.55);
-      display: none;
-      align-items: center; justify-content: center;
-      z-index: 9999;
-      padding: 16px;
-    }
+    /* Popup */
+    .pop{ position: fixed; inset: 0; background: rgba(0,0,0,.55); display: none; align-items: center; justify-content: center; z-index: 9999; padding: 16px; }
     .pop.show{ display:flex; }
     .pop-card{
-      background:#fff; color:#111;
-      width: min(92vw, 560px);
-      border-radius: 16px;
-      box-shadow: 0 16px 50px rgba(0,0,0,.25);
-      padding: 18px;
-      max-height: 80vh; overflow:auto;
-      animation: popIn .18s ease-out;
+      background:#fff; color:#111; width: min(92vw, 560px);
+      border-radius: 16px; box-shadow: 0 16px 50px rgba(0,0,0,.25); padding: 18px;
+      max-height: 80vh; overflow:auto; animation: popIn .18s ease-out;
     }
     @keyframes popIn{ from{ transform: scale(.96); opacity: .0 } to{ transform: scale(1); opacity:1 } }
-    .pop-head{
-      display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;
-    }
-    .pop-word{
-      font-size: clamp(20px, 4.5vw, 28px);
-      font-weight:700;
-      color: var(--magenta);
-      margin:0;
-    }
-    .pop-msg{
-      margin: 6px 0 0; font-size: clamp(14px, 2.8vw, 16px); line-height:1.45;
-    }
-    .pop-close{
-      appearance:none; border:0; background:#111; color:#fff;
-      padding:8px 12px; font-weight:700; border-radius:10px; cursor:pointer;
-    }
+    .pop-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+    .pop-word{ font-size: clamp(20px, 4.5vw, 28px); font-weight:700; color: var(--magenta); margin:0; }
+    .pop-msg{ margin: 6px 0 0; font-size: clamp(14px, 2.8vw, 16px); line-height:1.45; }
+    .pop-close{ appearance:none; border:0; background:#111; color:#fff; padding:8px 12px; font-weight:700; border-radius:10px; cursor:pointer; }
     .pop-overlay-dismiss{ position:absolute; inset:0; }
   </style>
 </head>
 <body>
-  <!-- Logos de esquina (decorativos) -->
   <img class="corner logo-left"  src="https://raw.githubusercontent.com/00Jake00/juego-sopaletras/main/LOGO.png" alt="" aria-hidden="true">
   <img class="corner logo-right" src="https://raw.githubusercontent.com/00Jake00/juego-sopaletras/main/BTA.png"  alt="" aria-hidden="true">
 
@@ -273,7 +180,7 @@
     }
     function colocarPalabra(p){
       let placed=false,int=0;
-      while(!placed&&int<1200){
+      while(!placed&&int<1500){
         const [dx,dy]=DIRECCIONES[Math.floor(Math.random()*DIRECCIONES.length)];
         const row=Math.floor(Math.random()*TAM), col=Math.floor(Math.random()*TAM);
         if(puedeColocar(p.texto,row,col,dx,dy)){
@@ -318,12 +225,11 @@
       });
     }
 
+    // ===== Popup =====
     const pop=$("#pop"), popWord=$("#popWord"), popMsg=$("#popMsg"), popClose=$("#popClose");
     function showPopup(word,msg){
-      popWord.textContent=word;
-      popMsg.textContent=msg;
-      pop.classList.add("show");
-      popClose.focus();
+      popWord.textContent=word; popMsg.textContent=msg;
+      pop.classList.add("show"); popClose.focus();
       document.addEventListener("keydown",escHandler);
     }
     function hidePopup(){
@@ -334,50 +240,116 @@
     popClose.addEventListener("click",hidePopup);
     pop.addEventListener("click",(e)=>{ if(e.target.dataset.close) hidePopup(); });
 
-    let seleccion=[],seleccionActiva=false,totalEncontradas=0;
-    function seleccionarCelda(el){
-      if(!el||!el.classList.contains("cell"))return;
-      if(seleccion[seleccion.length-1]===el.id)return;
-      el.classList.add("selected"); seleccion.push(el.id);
+    // ===== Selección con “imán” a 8 direcciones =====
+    let startCell=null, seleccion=[], seleccionActiva=false, totalEncontradas=0;
+
+    function idToRC(id){ const [r,c]=id.split("-").map(Number); return {r,c}; }
+    function clampDir(n){ return n===0?0:(n>0?1:-1); }
+
+    function buildSnappedPath(startId, currentId){
+      const {r:rs,c:cs}=idToRC(startId);
+      const {r:rc,c:cc}=idToRC(currentId);
+      const dx = clampDir(cc - cs);
+      const dy = clampDir(rc - rs);
+      if(dx===0 && dy===0) return [startId];
+
+      const len = Math.max(Math.abs(cc-cs), Math.abs(rc-rs));
+      const path = [];
+      for(let i=0;i<=len;i++){
+        const r = rs + dy*i;
+        const c = cs + dx*i;
+        if(r<0||r>=TAM||c<0||c>=TAM) break;
+        path.push(`${r}-${c}`);
+      }
+      return path;
     }
-    function limpiarSeleccion(){
+
+    function paintSelection(ids){
+      // limpia
       document.querySelectorAll(".cell.selected").forEach(c=>c.classList.remove("selected"));
-      seleccion=[];
+      // pinta
+      ids.forEach(id=>{
+        const el=document.getElementById(id);
+        if(el && !el.classList.contains("found")) el.classList.add("selected");
+      });
     }
-    function marcarEncontrada(p){
-      p.coords.forEach(id=>{ const c=document.getElementById(id); c.classList.remove("selected"); c.classList.add("found"); });
-      document.getElementById(`palabra-${p.texto}`).classList.add("found");
-      totalEncontradas++; foundCountEl.textContent=totalEncontradas;
-      showPopup(p.texto,p.reflexion);
-    }
+
     function verificarSeleccion(){
-      if(seleccion.length<2){ limpiarSeleccion(); return; }
-      const txt=seleccion.map(id=>document.getElementById(id).textContent).join("");
-      const hit=PALABRAS.find(p=> seleccion.length===p.coords.length && txt===p.texto && p.coords.every((c,i)=>c===seleccion[i]));
-      if(hit){ marcarEncontrada(hit); limpiarSeleccion(); return; }
-      const txtInv=[...txt].reverse().join(""), coordsInv=[...seleccion].reverse();
-      const hitInv=PALABRAS.find(p=> seleccion.length===p.coords.length && txtInv===p.texto && p.coords.every((c,i)=>c===coordsInv[i]));
-      if(hitInv){ marcarEncontrada(hitInv); }
-      limpiarSeleccion();
+      if(seleccion.length<2){ paintSelection([]); seleccion=[]; return; }
+
+      const txt = seleccion.map(id=>document.getElementById(id).textContent).join("");
+      const txtInv = [...txt].reverse().join("");
+      const coordsInv = [...seleccion].reverse();
+
+      const hit = PALABRAS.find(p =>
+        seleccion.length===p.coords.length &&
+        (txt===p.texto && p.coords.every((c,i)=>c===seleccion[i]) ||
+         txtInv===p.texto && p.coords.every((c,i)=>c===coordsInv[i]))
+      );
+
+      if(hit){
+        hit.coords.forEach(id=>{
+          const cell=document.getElementById(id);
+          cell.classList.remove("selected"); cell.classList.add("found");
+        });
+        document.getElementById(`palabra-${hit.texto}`).classList.add("found");
+        totalEncontradas++; foundCountEl.textContent=totalEncontradas;
+        showPopup(hit.texto, hit.reflexion);
+      }
+      paintSelection([]); seleccion=[];
     }
 
-    function empezar(e){ seleccionActiva=true; limpiarSeleccion(); seleccionarCelda(e.target.closest(".cell")); }
-    function mover(e){ if(!seleccionActiva) return; seleccionarCelda(e.target.closest(".cell")); }
-    function fin(){ if(seleccionActiva){ seleccionActiva=false; verificarSeleccion(); } }
+    function empezar(e){
+      const cell = e.target.closest(".cell");
+      if(!cell) return;
+      seleccionActiva=true;
+      startCell = cell.id;
+      seleccion = [startCell];
+      paintSelection(seleccion);
+    }
+    function mover(e){
+      if(!seleccionActiva || !startCell) return;
+      const cell = e.target.closest(".cell");
+      if(!cell) return;
+      const path = buildSnappedPath(startCell, cell.id);
+      seleccion = path;
+      paintSelection(seleccion);
+    }
+    function fin(){
+      if(!seleccionActiva) return;
+      seleccionActiva=false;
+      verificarSeleccion();
+    }
 
-    function startTouch(e){ e.preventDefault(); seleccionActiva=true; limpiarSeleccion(); const t=document.elementFromPoint(e.touches[0].clientX,e.touches[0].clientY); seleccionarCelda(t); }
-    function moveTouch(e){ e.preventDefault(); if(!seleccionActiva)return; const t=document.elementFromPoint(e.touches[0].clientX,e.touches[0].clientY); seleccionarCelda(t); }
+    function startTouch(e){
+      e.preventDefault();
+      const t=document.elementFromPoint(e.touches[0].clientX,e.touches[0].clientY);
+      if(!(t && t.classList.contains("cell"))) return;
+      seleccionActiva=true; startCell=t.id; seleccion=[startCell]; paintSelection(seleccion);
+    }
+    function moveTouch(e){
+      e.preventDefault();
+      if(!seleccionActiva || !startCell) return;
+      const t=document.elementFromPoint(e.touches[0].clientX,e.touches[0].clientY);
+      if(!(t && t.classList.contains("cell"))) return;
+      const path = buildSnappedPath(startCell, t.id);
+      seleccion = path;
+      paintSelection(seleccion);
+    }
 
     function eventos(){
-      sopa.addEventListener("mousedown",empezar);
-      sopa.addEventListener("mousemove",mover);
-      document.addEventListener("mouseup",fin);
-      sopa.addEventListener("touchstart",startTouch,{passive:false});
-      sopa.addEventListener("touchmove",moveTouch,{passive:false});
-      sopa.addEventListener("touchend",fin);
+      // mouse
+      sopa.addEventListener("mousedown", empezar);
+      sopa.addEventListener("mousemove", mover);
+      document.addEventListener("mouseup", fin);
+      // touch
+      sopa.addEventListener("touchstart", startTouch, {passive:false});
+      sopa.addEventListener("touchmove",  moveTouch,  {passive:false});
+      sopa.addEventListener("touchend",   fin);
       sopa.addEventListener("touchcancel",fin);
     }
 
+    // Init
     PALABRAS.forEach(p=>colocarPalabra(p));
     rellenarLetras();
     renderSopa();
@@ -386,3 +358,4 @@
   </script>
 </body>
 </html>
+
