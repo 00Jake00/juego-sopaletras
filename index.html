@@ -1,150 +1,165 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sopa de Letras - Amor y Amistad</title>
-
-  <!-- Comfortaa -->
-  <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;700&display=swap" rel="stylesheet">
-
   <style>
-    :root{
-      --primary:#d63384;   /* Magenta */
-      --accent:#ffc0cb;
-      --shadow:0 8px 30px rgba(0,0,0,.08);
+    body {
+      font-family: 'Comfortaa', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: #fff0f5;
+      margin: 0;
+      padding: 20px;
+      min-height: 100vh;
+      background-image: url('https://github.com/00Jake00/juego-sopaletras/blob/main/DPCC_Campan%CC%83a%20Amor%20y%20Amistad_FondoJuegos_Fondo-H.jpg?raw=true');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
     }
 
-    *{ box-sizing:border-box; }
-    html,body{ height:100%; }
-    body{
-      margin:0; padding:16px;
-      font-family: "Comfortaa", system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial;
-      color:#222;
-      display:flex; flex-direction:column; align-items:center; gap:12px;
-      background: transparent;
-    }
-
-    /* Fondo full H/V */
-    body::before{
-      content:"";
-      position: fixed; inset: 0;
-      z-index: -1;
-      background: url("https://raw.githubusercontent.com/00Jake00/juego-sopaletras/main/DPCC_Campan%CC%83a%20Amor%20y%20Amistad_FondoJuegos_Fondo-H.jpg") center/cover no-repeat;
-    }
     @media (max-width: 575.98px){
-      body::before{
-        background-image: url("https://raw.githubusercontent.com/00Jake00/juego-sopaletras/main/DPCC_Campan%CC%83a%20Amor%20y%20Amistad_FondoJuegos_Fondo-V.jpg");
+      body {
+        background-image: url('https://github.com/00Jake00/juego-sopaletras/blob/main/DPCC_Campan%CC%83a%20Amor%20y%20Amistad_FondoJuegos_Fondo-V.jpg?raw=true');
       }
     }
 
-    /* Logos (scroll) */
-    .logo-row{ width:100%; max-width:1000px; margin:0 auto; }
-    .corner{
-      position:static !important;
-      display:inline-block;
-      width: clamp(68px, 22vw, 96px) !important;
-      height:auto; margin:6px 0;
-      pointer-events:none;
-    }
-    .logo-left{  float:left; }
-    .logo-right{ float:right; }
-    header{ clear:both; margin-top:6px; }
-
-    @media (min-width: 992px){
-      .corner{ width: clamp(110px, 12vw, 160px) !important; margin:10px 0; }
-      header{ margin-top:8px; }
+    h1 {
+      color: #d63384;
+      text-align: center;
+      margin-top: 60px;
     }
 
-    /* Encabezado */
-    header{ max-width:960px; width:100%; text-align:center }
-    h1{ margin:.25rem 0; color:var(--primary); font-size: clamp(22px, 4.8vw, 34px); text-shadow:none; }
-    p.sub{ margin:0; opacity:.95; color:#111; }
-
-    /* Tablero (más grande en desktop) */
-    .grid{
-      display:grid;
+    .grid {
+      display: grid;
       grid-template-columns: repeat(12, 1fr);
       width: 100%;
-      max-width: 680px;    /* <- más grande */
+      max-width: 500px;
       aspect-ratio: 1 / 1;
       gap: 2px;
-      margin: 16px 0;
+      margin: 20px 0;
       touch-action: none;
-      -webkit-tap-highlight-color: transparent;
+    }
+    .cell {
+      background-color: white;
+      border: 1px solid #ccc;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-weight: bold;
       user-select: none;
-      -webkit-user-select: none;
+      cursor: pointer;
+      font-size: 1.2rem;
     }
-    .cell{
-      background-color:#fff;
-      border:1px solid #ccc;
-      display:flex; justify-content:center; align-items:center;
-      font-weight:700;
-      cursor:pointer;
-      font-size: clamp(1.05rem, 1.2vw, 1.35rem);  /* un pelín más grande */
-      line-height:1;
+    .cell.selected {
+      background-color: #d63384;
+      color: white;
     }
-    .cell.selected{ background-color:#d63384; color:#fff; }
-    .cell.found{ background-color:#ffc0cb; color:#fff; }
+    .cell.found {
+      background-color: #ffc0cb;
+      color: white;
+    }
 
-    /* Panel */
-    .panel{
-      background: rgba(255,255,255,.92);
-      padding: 12px 14px;
-      border-radius:12px;
-      box-shadow: var(--shadow);
-      max-width: 680px;
-      text-align:center;
+    .panel {
+      margin-top: 20px;
+      background: #fff;
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      max-width: 500px;
+      text-align: center;
     }
-    .word-list{ display:flex; flex-wrap:wrap; justify-content:center; gap:8px; }
-    .word{
-      background:#f8d7da; padding:6px 10px; border-radius:999px; font-weight:700; font-size:.95rem;
+    .word-list {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
     }
-    .word.found{ background:#c3e6cb; }
+    .word {
+      background: #f8d7da;
+      padding: 5px 10px;
+      border-radius: 5px;
+      font-weight: bold;
+    }
+    .word.found {
+      background: #c3e6cb;
+    }
 
-    /* Modal reflexión */
-    .modal{
-      position: fixed; inset: 0;
-      background: rgba(0,0,0,.56);
-      display:none; align-items:center; justify-content:center;
-      padding: 16px;
-      z-index: 9999;
+    /* === Logos en esquinas (desktop) === */
+    .corner {
+      position: fixed;
+      top: 10px;
+      width: 100px;
+      z-index: 1000;
+      pointer-events: none;
     }
-    .modal.show{ display:flex; }
-    .modal-card{
-      background:#fff; color:#111; border-radius:16px;
-      box-shadow: var(--shadow);
-      max-width: 560px; width:100%;
-      padding: 18px 16px 14px;
-      text-align:center; position: relative;
+    .logo-left { left: 10px; }
+    .logo-right { right: 10px; }
+
+    /* === Ajuste móvil: logos no fijos, bajan al flujo === */
+    @media (max-width: 575.98px){
+      .corner{
+        position: static;
+        display: block;
+        margin: 6px auto 8px;
+        width: clamp(72px, 32vw, 110px);
+        z-index: auto;
+        pointer-events: none;
+      }
+      .logo-left{ left:auto; }
+      .logo-right{ right:auto; }
     }
-    .modal-title{ margin:0 0 6px; color:#d63384; font-weight:800; }
-    .modal-body{ margin:0; font-size:1rem; line-height:1.4; }
-    .modal-close{
-      position:absolute; top:8px; right:8px;
-      border:0; background:#fff; color:#111; font-size:20px;
-      width:32px; height:32px; border-radius:50%; cursor:pointer;
-      box-shadow:0 0 0 1px rgba(0,0,0,.12);
+
+    /* Popup reflexiones */
+    .popup {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.6);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      visibility: hidden;
+      opacity: 0;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+      z-index: 2000;
     }
-    .modal-close:focus-visible{ outline:3px solid #0005; outline-offset:2px; }
+    .popup.active {
+      visibility: visible;
+      opacity: 1;
+    }
+    .popup-content {
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      max-width: 400px;
+      text-align: center;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+      position: relative;
+    }
+    .popup-content p {
+      margin: 0;
+      font-style: italic;
+      color: #333;
+    }
+    .popup-close {
+      position: absolute;
+      top: 8px;
+      right: 12px;
+      cursor: pointer;
+      font-weight: bold;
+      color: #d63384;
+    }
   </style>
 </head>
 <body>
-
   <!-- Logos -->
-  <div class="logo-row">
-    <img class="corner logo-left"
-         src="https://raw.githubusercontent.com/00Jake00/juego-sopaletras/main/LOGO.png"
-         alt="Logo campaña" loading="lazy">
-    <img class="corner logo-right"
-         src="https://raw.githubusercontent.com/00Jake00/juego-sopaletras/main/BTA.png"
-         alt="Logo Bogotá" loading="lazy">
-  </div>
+  <img src="https://github.com/00Jake00/juego-sopaletras/blob/main/LOGO.png?raw=true" alt="Logo equipo" class="corner logo-left">
+  <img src="https://github.com/00Jake00/juego-sopaletras/blob/main/BTA.png?raw=true" alt="Logo campaña" class="corner logo-right">
 
-  <header>
-    <h1>Palabras que construyen Amor y Amistad</h1>
-    <p class="sub">Encuentra las parejas: palabra + mensaje que construyen vínculos sanos.</p>
-  </header>
+  <h1>Palabras que construyen Amor y Amistad</h1>
 
   <div class="grid" id="sopa"></div>
 
@@ -152,20 +167,17 @@
     <div class="word-list" id="lista-palabras"></div>
   </div>
 
-  <!-- Modal reflexión -->
-  <div class="modal" id="modal">
-    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalTitle" aria-describedby="modalBody">
-      <button class="modal-close" id="modalClose" aria-label="Cerrar">×</button>
-      <h3 class="modal-title" id="modalTitle">¡Bien!</h3>
-      <p class="modal-body" id="modalBody">Reflexión…</p>
+  <!-- Popup -->
+  <div class="popup" id="popup">
+    <div class="popup-content">
+      <span class="popup-close" id="popupClose">X</span>
+      <p id="popupText"></p>
     </div>
   </div>
 
   <script>
     const tam = 12;
     const grid = Array.from({ length: tam }, () => Array(tam).fill(""));
-
-    // 11 palabras + reflexiones
     const palabras = [
       { texto: "CONVIVENCIA", reflexion: "La mejor celebración es la que se vive pacíficamente.", coords: [] },
       { texto: "AMISTAD", reflexion: "Compartir con respeto y cuidado fortalece la amistad.", coords: [] },
@@ -197,11 +209,14 @@
     function colocarPalabra(p) {
       let placed = false;
       let intentos = 0;
+
       while (!placed && intentos < 200) {
         const dir = direcciones[Math.floor(Math.random() * direcciones.length)];
-        const dx = dir[0], dy = dir[1];
+        const dx = dir[0];
+        const dy = dir[1];
         const row = Math.floor(Math.random() * tam);
         const col = Math.floor(Math.random() * tam);
+
         if (puedeColocar(p.texto, row, col, dx, dy)) {
           const coords = [];
           for (let i = 0; i < p.texto.length; i++) {
@@ -222,13 +237,18 @@
       const letras = "ABCDEFGHIJKLMNÑOPQRSTUVWXYZ";
       for (let i = 0; i < tam; i++) {
         for (let j = 0; j < tam; j++) {
-          if (!grid[i][j]) grid[i][j] = letras[Math.floor(Math.random() * letras.length)];
+          if (!grid[i][j]) {
+            grid[i][j] = letras[Math.floor(Math.random() * letras.length)];
+          }
         }
       }
     }
 
-    const sopa  = document.getElementById("sopa");
+    const sopa = document.getElementById("sopa");
     const lista = document.getElementById("lista-palabras");
+    const popup = document.getElementById("popup");
+    const popupText = document.getElementById("popupText");
+    const popupClose = document.getElementById("popupClose");
 
     function renderSopa() {
       sopa.innerHTML = "";
@@ -254,55 +274,13 @@
       });
     }
 
-    // ===== Selección con “imán” (snap a línea) =====
     let seleccion = [];
     let seleccionActiva = false;
-
-    function idToRC(id){ const [r,c]=id.split('-').map(Number); return {r,c}; }
-    function rcToId(r,c){ return `${r}-${c}`; }
-    function sign(n){ return n===0?0:(n>0?1:-1); }
-
-    // Devuelve la línea “enderezada” entre primer y último punto, en la dirección más probable (8 direcciones)
-    function snapLine(ids){
-      if(ids.length<2) return ids;
-      const start = idToRC(ids[0]);
-      const end   = idToRC(ids[ids.length-1]);
-      let dr = end.r - start.r;
-      let dc = end.c - start.c;
-
-      // Elegir dirección dominante (horizontal, vertical o diagonal)
-      const adr = Math.abs(dr), adc = Math.abs(dc);
-      let stepR=0, stepC=0, len=0;
-
-      if(adr === adc && adr!==0){
-        // diagonal perfecta
-        stepR = sign(dr); stepC = sign(dc); len = adr;
-      }else if(adc > adr){
-        // más horizontal
-        stepR = 0; stepC = sign(dc); len = adc;
-      }else if(adr > adc){
-        // más vertical
-        stepR = sign(dr); stepC = 0; len = adr;
-      }else{
-        // mismo punto
-        return [ids[0]];
-      }
-
-      const line = [];
-      for(let i=0;i<=len;i++){
-        const r = start.r + i*stepR;
-        const c = start.c + i*stepC;
-        if(r>=0 && r<tam && c>=0 && c<tam) line.push(rcToId(r,c));
-      }
-      return line;
-    }
 
     function iniciarEventos() {
       sopa.addEventListener("mousedown", empezarSeleccion);
       sopa.addEventListener("mousemove", arrastrarSeleccion);
       sopa.addEventListener("mouseup", finalizarSeleccion);
-      sopa.addEventListener("mouseleave", ()=> seleccionActiva=false);
-
       sopa.addEventListener("touchstart", empezarSeleccionTouch, { passive: false });
       sopa.addEventListener("touchmove", arrastrarSeleccionTouch, { passive: false });
       sopa.addEventListener("touchend", finalizarSeleccion);
@@ -327,34 +305,21 @@
       seleccionActiva = true;
       seleccion = [];
       limpiarSeleccion();
-      const t = e.touches[0];
-      const touch = document.elementFromPoint(t.clientX, t.clientY);
+      const touch = document.elementFromPoint(e.touches[0].clientX, e.touches[0].clientY);
       if (touch && touch.classList.contains("cell")) seleccionarCelda(touch);
     }
 
     function arrastrarSeleccionTouch(e) {
       e.preventDefault();
       if (!seleccionActiva) return;
-      const t = e.touches[0];
-      const touch = document.elementFromPoint(t.clientX, t.clientY);
+      const touch = document.elementFromPoint(e.touches[0].clientX, e.touches[0].clientY);
       if (touch && touch.classList.contains("cell") && !seleccion.includes(touch.id)) seleccionarCelda(touch);
     }
 
     function finalizarSeleccion() {
-      if(!seleccion.length) return;
       seleccionActiva = false;
-
-      // “Imán”: enderezar a línea probable
-      const snapped = snapLine(seleccion);
-
-      const wordFwd = snapped.map(id => document.getElementById(id).textContent).join("");
-      const wordRev = wordFwd.split("").reverse().join("");
-
-      const match = palabras.find(p =>
-        (p.texto === wordFwd && p.coords.length===snapped.length && p.coords.every((c,i)=> snapped[i]===c)) ||
-        (p.texto === wordRev && p.coords.length===snapped.length && p.coords.slice().reverse().every((c,i)=> snapped[i]===c))
-      );
-
+      const palabraActual = seleccion.map(id => document.getElementById(id).textContent).join("");
+      const match = palabras.find(p => p.texto === palabraActual && p.coords.every((c, i) => seleccion[i] === c));
       if (match) {
         match.coords.forEach(id => {
           const cell = document.getElementById(id);
@@ -362,7 +327,8 @@
           cell.classList.add("found");
         });
         document.getElementById(`palabra-${match.texto}`).classList.add("found");
-        abrirModal(match.texto, match.reflexion);
+        popupText.textContent = match.reflexion;
+        popup.classList.add("active");
       } else {
         limpiarSeleccion();
       }
@@ -378,18 +344,10 @@
       document.querySelectorAll(".cell.selected").forEach(c => c.classList.remove("selected"));
     }
 
-    // Modal
-    const modal = document.getElementById('modal');
-    const modalTitle = document.getElementById('modalTitle');
-    const modalBody  = document.getElementById('modalBody');
-    const modalClose = document.getElementById('modalClose');
-    function abrirModal(titulo, texto){ modalTitle.textContent=titulo; modalBody.textContent=texto; modal.classList.add('show'); }
-    function cerrarModal(){ modal.classList.remove('show'); }
-    modalClose.addEventListener('click', cerrarModal);
-    modal.addEventListener('click', (e)=>{ if(e.target === modal) cerrarModal(); });
-    document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape' && modal.classList.contains('show')) cerrarModal(); });
+    popupClose.addEventListener("click", () => {
+      popup.classList.remove("active");
+    });
 
-    // Init
     palabras.forEach(p => colocarPalabra(p));
     rellenarLetras();
     renderSopa();
@@ -398,5 +356,3 @@
   </script>
 </body>
 </html>
-
-
