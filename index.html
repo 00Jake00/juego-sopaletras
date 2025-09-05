@@ -35,19 +35,18 @@
     header{ text-align:center; max-width:900px }
     h1{
       margin:.25rem 0 .35rem;
-      color: var(--magenta);           /* Título magenta */
+      color: var(--magenta);
       font-weight:700;
       font-size: clamp(22px, 4.6vw, 40px);
       line-height:1.15;
     }
     p.sub{
       margin:0;
-      color:#111;                      /* Frase en negro */
+      color:#111;
       font-weight:600;
       font-size: clamp(14px, 2.8vw, 18px);
     }
 
-    /* HUD */
     .hud{
       display:flex; gap:10px; flex-wrap:wrap; justify-content:center;
       font-size: clamp(12px, 2.6vw, 14px);
@@ -59,17 +58,15 @@
       font-weight:700;
     }
 
-    /* Tablero */
     .grid{
       display:grid;
-      grid-template-columns: repeat(18, 1fr); /* 18x18 */
+      grid-template-columns: repeat(18, 1fr);
       width: min(92vw, 700px);
       aspect-ratio: 1 / 1;
       gap: 2px;
       margin: 14px 0;
-      touch-action: none; /* importante para iOS */
+      touch-action: none;
       -webkit-tap-highlight-color: transparent;
-      background: transparent;
     }
     .cell{
       background: var(--cell);
@@ -84,7 +81,6 @@
     .cell.selected{ background: var(--sel); color: var(--sel-text); }
     .cell.found{ background: var(--found); color:#fff; }
 
-    /* Panel */
     .panel{
       width: min(92vw, 700px);
       background:#fff;
@@ -105,13 +101,12 @@
       font-size: clamp(12px, 2.6vw, 14px);
     }
     .word.found{ background: var(--chip-found); }
-    .reflexion{ display:none; } /* ya no mostramos texto fijo abajo; ahora va en popup */
 
     @media (max-width: 420px){
       .grid{ gap: 1.5px; }
     }
 
-    /* ===== Popup accesible ===== */
+    /* ===== Popup ===== */
     .pop{
       position: fixed; inset: 0;
       background: rgba(0,0,0,.55);
@@ -119,7 +114,6 @@
       align-items: center; justify-content: center;
       z-index: 9999;
       padding: 16px;
-      overscroll-behavior: contain;
     }
     .pop.show{ display:flex; }
     .pop-card{
@@ -133,10 +127,13 @@
     }
     @keyframes popIn{ from{ transform: scale(.96); opacity: .0 } to{ transform: scale(1); opacity:1 } }
     .pop-head{
-      display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:8px;
+      display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;
     }
-    .pop-title{
-      margin:0; font-size: clamp(18px, 3.8vw, 22px); font-weight:700; color: var(--magenta);
+    .pop-word{
+      font-size: clamp(20px, 4.5vw, 28px);
+      font-weight:700;
+      color: var(--magenta);
+      margin:0;
     }
     .pop-msg{
       margin: 6px 0 0; font-size: clamp(14px, 2.8vw, 16px); line-height:1.45;
@@ -146,9 +143,6 @@
       padding:8px 12px; font-weight:700; border-radius:10px; cursor:pointer;
     }
     .pop-overlay-dismiss{ position:absolute; inset:0; }
-    @media (prefers-reduced-motion: reduce){
-      .pop-card{ animation: none; }
-    }
   </style>
 </head>
 <body>
@@ -165,27 +159,24 @@
 
   <div class="panel">
     <div class="word-list" id="lista-palabras"></div>
-    <div class="reflexion" id="reflexion"></div>
   </div>
 
-  <!-- ===== Popup ===== -->
-  <div class="pop" id="pop" role="dialog" aria-modal="true" aria-labelledby="popTitle" aria-describedby="popMsg">
+  <!-- Popup -->
+  <div class="pop" id="pop" role="dialog" aria-modal="true">
     <div class="pop-overlay-dismiss" data-close="1"></div>
     <div class="pop-card">
       <div class="pop-head">
-        <h2 class="pop-title" id="popTitle">¡Palabra encontrada!</h2>
-        <button class="pop-close" type="button" id="popClose">Cerrar</button>
+        <h2 class="pop-word" id="popWord">Palabra</h2>
+        <button class="pop-close" type="button" id="popClose">X</button>
       </div>
       <p class="pop-msg" id="popMsg"></p>
     </div>
   </div>
 
   <script>
-    /* ====== Configuración ====== */
-    const TAM = 18; // 18x18 para palabras largas
+    const TAM = 18;
     const grid = Array.from({ length: TAM }, () => Array(TAM).fill(""));
 
-    // Lista de palabras (sin tildes) + reflexiones EXACTAS
     const PALABRAS = [
       { texto: "CONVIVENCIA", reflexion: "La mejor celebración es la que se vive pacíficamente.", coords: [] },
       { texto: "AMISTAD", reflexion: "Compartir con respeto y cuidado fortalece la amistad.", coords: [] },
@@ -200,234 +191,132 @@
       { texto: "AMOR", reflexion: "Cuidar cómo celebramos es cuidar la vida de quienes amamos.", coords: [] }
     ];
 
-    // 8 direcciones (incluye diagonales e inversas)
     const DIRECCIONES = [
-      [ 0,  1], [ 1,  0], [ 1,  1], [-1,  1],
-      [ 0, -1], [-1,  0], [-1, -1], [ 1, -1]
+      [0,1],[1,0],[1,1],[-1,1],
+      [0,-1],[-1,0],[-1,-1],[1,-1]
     ];
-
-    // Letras aleatorias (incluye Ñ)
     const ALFABETO = "ABCDEFGHIJKLMNÑOPQRSTUVWXYZ";
 
-    /* ====== Utilidades ====== */
-    const $  = (sel, ctx=document) => ctx.querySelector(sel);
+    const $ = (sel, ctx=document) => ctx.querySelector(sel);
 
-    function puedeColocar(palabra, row, col, dx, dy) {
-      for (let i = 0; i < palabra.length; i++) {
-        const r = row + i * dy;
-        const c = col + i * dx;
-        if (r < 0 || r >= TAM || c < 0 || c >= TAM) return false;
-        if (grid[r][c] && grid[r][c] !== palabra[i]) return false;
+    function puedeColocar(palabra,row,col,dx,dy){
+      for(let i=0;i<palabra.length;i++){
+        const r=row+i*dy,c=col+i*dx;
+        if(r<0||r>=TAM||c<0||c>=TAM|| (grid[r][c] && grid[r][c]!==palabra[i])) return false;
       }
       return true;
     }
-
-    function colocarPalabra(p) {
-      let placed = false;
-      let intentos = 0;
-      const MAX_INTENTOS = 800;
-
-      while (!placed && intentos < MAX_INTENTOS) {
-        const [dx, dy] = DIRECCIONES[Math.floor(Math.random() * DIRECCIONES.length)];
-        const row = Math.floor(Math.random() * TAM);
-        const col = Math.floor(Math.random() * TAM);
-
-        if (puedeColocar(p.texto, row, col, dx, dy)) {
-          const coords = [];
-          for (let i = 0; i < p.texto.length; i++) {
-            const r = row + i * dy;
-            const c = col + i * dx;
-            grid[r][c] = p.texto[i];
-            coords.push(`${r}-${c}`);
+    function colocarPalabra(p){
+      let placed=false,int=0;
+      while(!placed&&int<800){
+        const [dx,dy]=DIRECCIONES[Math.floor(Math.random()*DIRECCIONES.length)];
+        const row=Math.floor(Math.random()*TAM), col=Math.floor(Math.random()*TAM);
+        if(puedeColocar(p.texto,row,col,dx,dy)){
+          const coords=[];
+          for(let i=0;i<p.texto.length;i++){
+            const r=row+i*dy,c=col+i*dx;
+            grid[r][c]=p.texto[i]; coords.push(`${r}-${c}`);
           }
-          p.coords = coords;
-          placed = true;
+          p.coords=coords; placed=true;
         }
-        intentos++;
+        int++;
       }
-      if (!placed) console.warn(`No se pudo colocar la palabra: ${p.texto}`);
     }
-
-    function rellenarLetras() {
-      for (let i = 0; i < TAM; i++) {
-        for (let j = 0; j < TAM; j++) {
-          if (!grid[i][j]) {
-            grid[i][j] = ALFABETO[Math.floor(Math.random() * ALFABETO.length)];
+    function rellenarLetras(){
+      for(let i=0;i<TAM;i++){
+        for(let j=0;j<TAM;j++){
+          if(!grid[i][j]){
+            grid[i][j]=ALFABETO[Math.floor(Math.random()*ALFABETO.length)];
           }
         }
       }
     }
 
-    const sopa = $("#sopa");
-    const lista = $("#lista-palabras");
-    const foundCountEl = $("#foundCount");
-
-    function renderSopa() {
-      sopa.innerHTML = "";
-      for (let i = 0; i < TAM; i++) {
-        for (let j = 0; j < TAM; j++) {
-          const div = document.createElement("div");
-          div.className = "cell";
-          div.id = `${i}-${j}`;
-          div.textContent = grid[i][j];
-          sopa.appendChild(div);
+    const sopa=$("#sopa"), lista=$("#lista-palabras"), foundCountEl=$("#foundCount");
+    function renderSopa(){
+      sopa.innerHTML="";
+      for(let i=0;i<TAM;i++){
+        for(let j=0;j<TAM;j++){
+          const d=document.createElement("div");
+          d.className="cell"; d.id=`${i}-${j}`; d.textContent=grid[i][j];
+          sopa.appendChild(d);
         }
       }
     }
-
-    function mostrarPalabras() {
-      lista.innerHTML = "";
-      PALABRAS.forEach(p => {
-        const span = document.createElement("span");
-        span.className = "word";
-        span.id = `palabra-${p.texto}`;
-        span.textContent = p.texto;
-        lista.appendChild(span);
+    function mostrarPalabras(){
+      lista.innerHTML="";
+      PALABRAS.forEach(p=>{
+        const s=document.createElement("span");
+        s.className="word"; s.id=`palabra-${p.texto}`; s.textContent=p.texto;
+        lista.appendChild(s);
       });
     }
 
-    /* ====== Popup ====== */
-    const pop = $("#pop");
-    const popMsg = $("#popMsg");
-    const popClose = $("#popClose");
-
-    function showPopup(msg){
-      popMsg.textContent = msg;
+    const pop=$("#pop"), popWord=$("#popWord"), popMsg=$("#popMsg"), popClose=$("#popClose");
+    function showPopup(word,msg){
+      popWord.textContent=word;
+      popMsg.textContent=msg;
       pop.classList.add("show");
-
-      // Auto-cierre (puedes desactivar comentando estas 2 líneas)
-      clearTimeout(showPopup._t);
-      showPopup._t = setTimeout(hidePopup, 2200); // <-- cambia el tiempo o comenta para quitar autocierre
-
-      // Enfocar botón para accesibilidad
       popClose.focus();
-      document.addEventListener("keydown", onEscOnce, { once:true });
+      document.addEventListener("keydown",escHandler);
     }
     function hidePopup(){
       pop.classList.remove("show");
+      document.removeEventListener("keydown",escHandler);
     }
-    function onEscOnce(e){
-      if(e.key === "Escape") hidePopup();
+    function escHandler(e){ if(e.key==="Escape") hidePopup(); }
+    popClose.addEventListener("click",hidePopup);
+    pop.addEventListener("click",(e)=>{ if(e.target.dataset.close) hidePopup(); });
+
+    let seleccion=[],seleccionActiva=false,totalEncontradas=0;
+    function seleccionarCelda(el){
+      if(!el||!el.classList.contains("cell"))return;
+      if(seleccion[seleccion.length-1]===el.id)return;
+      el.classList.add("selected"); seleccion.push(el.id);
     }
-    pop.addEventListener("click", (e)=>{ if(e.target.dataset.close) hidePopup(); });
-    popClose.addEventListener("click", hidePopup);
-
-    /* ====== Selección con ratón/touch ====== */
-    let seleccion = [];
-    let seleccionActiva = false;
-    let totalEncontradas = 0;
-
-    function seleccionarCelda(el) {
-      if (!el || !el.classList.contains("cell")) return;
-      const id = el.id;
-      if (seleccion[seleccion.length-1] === id) return; // evitar repetir última
-      el.classList.add("selected");
-      seleccion.push(id);
+    function limpiarSeleccion(){
+      document.querySelectorAll(".cell.selected").forEach(c=>c.classList.remove("selected"));
+      seleccion=[];
     }
-
-    function limpiarSeleccion() {
-      document.querySelectorAll(".cell.selected").forEach(c => c.classList.remove("selected"));
-      seleccion = [];
+    function marcarEncontrada(p){
+      p.coords.forEach(id=>{ const c=document.getElementById(id); c.classList.remove("selected"); c.classList.add("found"); });
+      document.getElementById(`palabra-${p.texto}`).classList.add("found");
+      totalEncontradas++; foundCountEl.textContent=totalEncontradas;
+      showPopup(p.texto,p.reflexion);
     }
-
-    function marcarEncontrada(pal) {
-      pal.coords.forEach(id => {
-        const cell = document.getElementById(id);
-        cell.classList.remove("selected");
-        cell.classList.add("found");
-      });
-      const chip = document.getElementById(`palabra-${pal.texto}`);
-      chip.classList.add("found");
-
-      // Mostrar reflexión en popup
-      showPopup(pal.reflexion);
-
-      totalEncontradas++;
-      foundCountEl.textContent = totalEncontradas;
-    }
-
-    function verificarSeleccion() {
-      if (seleccion.length < 2) { limpiarSeleccion(); return; }
-
-      const textoSel = seleccion.map(id => document.getElementById(id).textContent).join("");
-
-      const hit = PALABRAS.find(p => {
-        if (seleccion.length !== p.coords.length) return false;
-        const coincideTexto = (textoSel === p.texto);
-        const coincideCoords = p.coords.every((c, i) => c === seleccion[i]);
-        return coincideTexto && coincideCoords;
-      });
-
-      if (hit) {
-        marcarEncontrada(hit);
-      } else {
-        // Intento inverso
-        const textoSelInv = [...textoSel].reverse().join("");
-        const coordsInv = [...seleccion].reverse();
-        const hitInv = PALABRAS.find(p => {
-          if (seleccion.length !== p.coords.length) return false;
-          const coincideTexto = (textoSelInv === p.texto);
-          const coincideCoords = p.coords.every((c, i) => c === coordsInv[i]);
-          return coincideTexto && coincideCoords;
-        });
-        if (hitInv) {
-          marcarEncontrada(hitInv);
-        }
-      }
-
+    function verificarSeleccion(){
+      if(seleccion.length<2){ limpiarSeleccion(); return; }
+      const txt=seleccion.map(id=>document.getElementById(id).textContent).join("");
+      const hit=PALABRAS.find(p=> seleccion.length===p.coords.length && txt===p.texto && p.coords.every((c,i)=>c===seleccion[i]));
+      if(hit){ marcarEncontrada(hit); limpiarSeleccion(); return; }
+      const txtInv=[...txt].reverse().join(""), coordsInv=[...seleccion].reverse();
+      const hitInv=PALABRAS.find(p=> seleccion.length===p.coords.length && txtInv===p.texto && p.coords.every((c,i)=>c===coordsInv[i]));
+      if(hitInv){ marcarEncontrada(hitInv); }
       limpiarSeleccion();
     }
 
-    function empezarSeleccion(e) {
-      seleccionActiva = true;
-      limpiarSeleccion();
-      const target = e.target.closest(".cell");
-      seleccionarCelda(target);
-    }
-    function arrastrarSeleccion(e) {
-      if (!seleccionActiva) return;
-      const target = e.target.closest(".cell");
-      if (target) seleccionarCelda(target);
-    }
-    function finalizarSeleccion() {
-      seleccionActiva = false;
-      verificarSeleccion();
+    function empezar(e){ seleccionActiva=true; limpiarSeleccion(); seleccionarCelda(e.target.closest(".cell")); }
+    function mover(e){ if(!seleccionActiva) return; seleccionarCelda(e.target.closest(".cell")); }
+    function fin(){ if(seleccionActiva){ seleccionActiva=false; verificarSeleccion(); } }
+
+    function startTouch(e){ e.preventDefault(); seleccionActiva=true; limpiarSeleccion(); const t=document.elementFromPoint(e.touches[0].clientX,e.touches[0].clientY); seleccionarCelda(t); }
+    function moveTouch(e){ e.preventDefault(); if(!seleccionActiva)return; const t=document.elementFromPoint(e.touches[0].clientX,e.touches[0].clientY); seleccionarCelda(t); }
+
+    function eventos(){
+      sopa.addEventListener("mousedown",empezar);
+      sopa.addEventListener("mousemove",mover);
+      document.addEventListener("mouseup",fin);
+      sopa.addEventListener("touchstart",startTouch,{passive:false});
+      sopa.addEventListener("touchmove",moveTouch,{passive:false});
+      sopa.addEventListener("touchend",fin);
+      sopa.addEventListener("touchcancel",fin);
     }
 
-    // TOUCH (iPhone friendly)
-    function empezarSeleccionTouch(e) {
-      e.preventDefault();
-      seleccionActiva = true;
-      limpiarSeleccion();
-      const touch = document.elementFromPoint(e.touches[0].clientX, e.touches[0].clientY);
-      seleccionarCelda(touch);
-    }
-    function arrastrarSeleccionTouch(e) {
-      e.preventDefault();
-      if (!seleccionActiva) return;
-      const touch = document.elementFromPoint(e.touches[0].clientX, e.touches[0].clientY);
-      seleccionarCelda(touch);
-    }
-
-    function iniciarEventos() {
-      sopa.addEventListener("mousedown", empezarSeleccion);
-      sopa.addEventListener("mousemove", arrastrarSeleccion);
-      document.addEventListener("mouseup", finalizarSeleccion);
-
-      sopa.addEventListener("touchstart", empezarSeleccionTouch, { passive: false });
-      sopa.addEventListener("touchmove", arrastrarSeleccionTouch, { passive: false });
-      sopa.addEventListener("touchend", finalizarSeleccion);
-      sopa.addEventListener("touchcancel", finalizarSeleccion);
-    }
-
-    /* ====== Init ====== */
-    PALABRAS.forEach(p => colocarPalabra(p));
+    PALABRAS.forEach(p=>colocarPalabra(p));
     rellenarLetras();
     renderSopa();
     mostrarPalabras();
-    iniciarEventos();
+    eventos();
   </script>
 </body>
 </html>
-
-
