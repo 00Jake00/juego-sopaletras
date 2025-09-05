@@ -3,266 +3,274 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Sopa de Letras - Amor y Amistad</title>
+  <title>Sopa de Letras – Amor y Amistad</title>
 
-  <!-- Tipografía -->
-  <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;700&display=swap" rel="stylesheet">
+  <!-- Comfortaa -->
+  <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;600;700&display=swap" rel="stylesheet">
 
   <style>
     :root{
       --magenta:#d63384;
-      --magenta-soft:#ffc0cb;
-      --ok:#2ecc71;
-      --panel:#ffffff;
-      --shadow:0 8px 30px rgba(0,0,0,.08);
+      --chipFound:#c3e6cb;
+      --chipWait:#f8d7da;
+      --badge:#111;
     }
 
     *{ box-sizing:border-box; }
+    html, body { height:100%; }
 
-    html, body { height: 100%; }
-
-    /* Fondo responsive por dispositivo */
+    /* Fondo de página (PC/Móvil) */
     body{
-      margin:0; padding:20px;
-      font-family: 'Comfortaa', system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial;
+      margin:0;
+      font-family: 'Comfortaa', system-ui, -apple-system, Segoe UI, Roboto, Arial;
       color:#111;
       min-height:100vh;
-      background: center/cover no-repeat fixed
-        url("https://raw.githubusercontent.com/00Jake00/juego-sopaletras/main/DPCC_Campan%CC%83a%20Amor%20y%20Amistad_FondoJuegos_Fondo-H.jpg");
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+    }
+    body::before{
+      content:"";
+      position:fixed;
+      inset:0;
+      z-index:-1;
+      background: url("https://raw.githubusercontent.com/00Jake00/juego-sopaletras/refs/heads/main/DPCC_Campan%CC%83a%20Amor%20y%20Amistad_FondoJuegos_Fondo-H.jpg") center/cover no-repeat;
     }
     @media (max-width: 575.98px){
-      body{
-        padding:16px;
-        background-image: url("https://raw.githubusercontent.com/00Jake00/juego-sopaletras/main/DPCC_Campan%CC%83a%20Amor%20y%20Amistad_FondoJuegos_Fondo-V.jpg");
+      body::before{
+        background-image: url("https://raw.githubusercontent.com/00Jake00/juego-sopaletras/refs/heads/main/DPCC_Campan%CC%83a%20Amor%20y%20Amistad_FondoJuegos_Fondo-V.jpg");
       }
     }
 
-    /* Logos fijos en las esquinas (siempre visibles) */
-    .logo-fixed{
-      position: fixed;
-      top: max(12px, env(safe-area-inset-top));
-      z-index: 1000;
-      display:block;
-      filter: drop-shadow(0 2px 8px rgba(0,0,0,.25));
+    /* Logos fijos en esquinas */
+    .corner{
+      position:fixed; top:14px; z-index:10;
+      width:84px; height:auto;
+      filter: drop-shadow(0 2px 6px rgba(0,0,0,.25));
+      user-select:none; pointer-events:none;
     }
-    .logo-left{ left: max(12px, env(safe-area-inset-left)); }
-    .logo-right{ right: max(12px, env(safe-area-inset-right)); }
+    .corner.left{ left:14px; }
+    .corner.right{ right:14px; }
 
-    /* Tamaños logos */
-    .logo-fixed img{ display:block; height:54px; width:auto; }
-    @media (min-width: 992px){
-      .logo-fixed img{ height:72px; }
+    /* Cabecera */
+    header{
+      width:100%;
+      max-width:1100px;
+      text-align:center;
+      margin:90px auto 12px; /* deja espacio para los logos */
+      padding:0 16px;
     }
-    @media (max-width: 575.98px){
-      .logo-fixed img{ height:44px; }
+    h1{
+      margin:.2rem 0 .35rem;
+      color:var(--magenta);
+      font-weight:700;
+      font-size: clamp(22px, 6vw, 38px);
+      text-shadow:none;
+    }
+    p.sub{
+      margin:0;
+      color:#111; /* negro */
+      font-size: clamp(14px, 3.6vw, 18px);
+    }
+
+    /* HUD */
+    .hud{
+      display:flex; gap:12px; align-items:center; justify-content:center; flex-wrap:wrap;
+      margin:10px 0 16px;
+      width:100%; max-width:1100px; padding:0 16px;
+    }
+    .badge{
+      background: rgba(17,17,17,.95); color:#fff;
+      padding:8px 12px; border-radius:999px;
+      border:1px solid rgba(255,255,255,.18);
+      box-shadow: 0 8px 30px rgba(0,0,0,.18);
+      font-weight:700;
     }
 
     /* Contenedor principal */
-    .wrap{
+    .main{
       width:100%;
-      max-width: 1000px;
-      margin:0 auto;
+      max-width:1100px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:14px;
+      padding: 0 16px 40px;
+    }
+
+    /* Tablero (18x18) */
+    .grid{
+      display:grid; gap:2px;
+      grid-template-columns: repeat(18, 1fr);
+      width:100%;
+      max-width:720px;  /* ancho cómodo en desktop */
+      aspect-ratio: 1 / 1;  /* cuadrado */
+      background: rgba(255,255,255,.35);
+      border-radius: 12px;
+      padding: 8px;
+      touch-action: none;
+      -webkit-user-select:none; user-select:none;
+    }
+    @media (max-width: 575.98px){
+      .grid{ max-width: 92vw; gap:2px; padding:6px; }
+    }
+
+    .cell{
+      background:#fff;
+      border:1px solid #ddd;
+      display:flex; align-items:center; justify-content:center;
+      font-weight:700;
+      font-size: clamp(.8rem, 2.9vw, 1.05rem);
+      user-select:none; cursor:pointer; border-radius:6px;
+    }
+    .cell.selected{ background: var(--magenta); color:#fff; }
+    .cell.found{ background:#ffc0cb; color:#fff; }
+
+    /* Palabras objetivo (chips) */
+    .panel{
+      width:100%; max-width:720px;
       background: rgba(255,255,255,.85);
       backdrop-filter: blur(2px);
-      border-radius: 16px;
-      box-shadow: var(--shadow);
-      padding: 18px;
-      /* separa contenido del header fijo con logos */
-      margin-top: 84px;
-    }
-    @media (max-width:575.98px){
-      .wrap{ margin-top: 76px; padding: 14px; }
-    }
-
-    h1{
-      color: var(--magenta);
-      text-align:center;
-      margin: 0 0 .35rem 0;
-      font-size: clamp(20px, 5vw, 32px);
-      line-height:1.15;
-    }
-    .sub{
-      text-align:center;
-      margin:0 0 10px 0;
-      font-size: clamp(14px, 3.6vw, 16px);
-      color:#111;
-      font-weight: 700;
-    }
-
-    /* Grilla del juego */
-    .grid{
-      display:grid;
-      grid-template-columns: repeat(12, 1fr);
-      width: 100%;
-      max-width: 520px;
-      aspect-ratio: 1/1;
-      gap: 2px;
-      margin: 16px auto;
-      touch-action: none; /* ayuda con selección táctil */
-      user-select: none;
-    }
-    .cell{
-      background-color: #fff;
-      border: 1px solid #ccc;
-      display:flex; align-items:center; justify-content:center;
-      font-weight: 700;
-      cursor: pointer;
-      font-size: clamp(14px, 3.2vw, 20px);
-    }
-    .cell.selected{
-      background-color: var(--magenta);
-      color:#fff;
-    }
-    .cell.found{
-      background-color: var(--magenta-soft);
-      color:#fff;
-    }
-
-    /* Panel con lista de palabras */
-    .panel{
-      margin: 14px auto 0;
-      background: var(--panel);
-      padding: 14px;
       border-radius: 12px;
-      box-shadow: var(--shadow);
-      max-width: 520px;
-      text-align:center;
+      padding: 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.12);
     }
     .word-list{
-      display:flex; flex-wrap:wrap; justify-content:center; gap:8px;
+      display:flex; flex-wrap:wrap; gap:8px; justify-content:center;
     }
     .word{
-      background:#f8d7da;
-      padding:6px 10px;
-      border-radius: 999px;
-      font-weight:700;
-      font-size: 14px;
+      background: var(--chipWait);
+      padding:6px 10px; border-radius:999px; font-weight:700; font-size:.95rem;
     }
-    .word.found{ background:#c3e6cb; }
+    .word.found{ background: var(--chipFound); color:#0b5d1e; }
 
-    /* Modal / Popup */
-    #popup{
-      position: fixed;
-      inset:0;
-      background: rgba(0,0,0,.55);
-      display:none;
-      align-items:center; justify-content:center;
-      z-index: 1200;
-      padding: 16px;
+    /* Popup reflexión */
+    .popup{
+      position: fixed; inset:0; display:none; align-items:center; justify-content:center;
+      background: rgba(0,0,0,.45); z-index: 20; padding: 16px;
     }
-    #popup.show{ display:flex; }
-    #popup .card{
-      background:#fff;
-      width: min(560px, 92vw);
-      border-radius: 14px;
-      box-shadow: 0 14px 46px rgba(0,0,0,.22);
-      padding: 18px 18px 14px;
-      text-align: center;
-      position: relative;
+    .popup.show{ display:flex; }
+    .popup-card{
+      width:min(92vw, 560px);
+      background:#fff; color:#111;
+      border-radius:16px; padding:18px 18px 16px;
+      box-shadow: 0 30px 60px rgba(0,0,0,.35);
+      position:relative;
     }
-    #popup .title{
-      margin: 0 0 8px 0;
-      font-size: clamp(16px, 4.2vw, 20px);
-      color:#111;
+    .popup .title{
+      margin: 0 36px 6px 0; /* espacio para el X */
+      font-weight:700; font-size: clamp(18px, 3.8vw, 22px); color:#111;
     }
-    #popup .msg{
-      margin:0;
-      font-size: clamp(15px, 4vw, 18px);
-      line-height: 1.4;
-      color:#333;
+    .popup .content{
+      margin:0; line-height:1.45; font-size: clamp(15px, 3.6vw, 18px);
     }
-    #popup .magenta{
-      color: var(--magenta);
-      font-weight: 700;
-      letter-spacing: .2px;
+    .popup .magenta{ color: var(--magenta); font-weight:700; }
+    .popup .close{
+      position:absolute; top:10px; right:10px;
+      border:0; background:#111; color:#fff;
+      width:32px; height:32px; border-radius:50%;
+      font-weight:700; cursor:pointer;
     }
-    #popup .close{
-      appearance:none; border:0; background:transparent; cursor:pointer;
-      position:absolute; top:8px; right:8px;
-      font-size: 20px; line-height:1; width:36px; height:36px;
-      border-radius: 50%;
+    .popup .close:focus-visible{ outline:3px solid #000; outline-offset: 2px; }
+
+    /* Logos responsive (tamaño y espacio superior del header) */
+    @media (max-width: 575.98px){
+      .corner{ width:64px; top:10px; }
+      header{ margin-top:78px; }
     }
-    #popup .close:focus-visible{
-      outline: 3px solid var(--magenta-soft); outline-offset: 2px;
+    @media (min-width: 992px){
+      .corner{ width:110px; top:16px; }
+      header{ margin-top:120px; }
     }
+
   </style>
 </head>
 <body>
 
-  <!-- Logos fijos -->
-  <a class="logo-fixed logo-left" href="#" aria-label="Logo campaña">
-    <img src="https://raw.githubusercontent.com/00Jake00/juego-sopaletras/main/LOGO.png" alt="Logo campaña">
-  </a>
-  <a class="logo-fixed logo-right" href="#" aria-label="Logo ciudad">
-    <img src="https://raw.githubusercontent.com/00Jake00/juego-sopaletras/main/BTA.png" alt="Logo Bogotá">
-  </a>
+  <!-- Logos fijos en esquinas -->
+  <img class="corner left"  alt="Logo de la campaña"
+       src="https://raw.githubusercontent.com/00Jake00/juego-sopaletras/refs/heads/main/LOGO.png">
+  <img class="corner right" alt="Logo Bogotá"
+       src="https://raw.githubusercontent.com/00Jake00/juego-sopaletras/refs/heads/main/BTA.png">
 
-  <main class="wrap" aria-labelledby="titulo">
-    <h1 id="titulo">Palabras que construyen Amor y Amistad</h1>
+  <!-- Cabecera -->
+  <header>
+    <h1>Palabras que construyen Amor y Amistad</h1>
     <p class="sub">Encuentra las parejas: <strong>palabra</strong> + <strong>mensaje</strong> que construyen vínculos sanos.</p>
+  </header>
 
-    <div class="grid" id="sopa" role="grid" aria-label="Sopa de letras"></div>
+  <!-- HUD -->
+  <div class="hud" role="status" aria-live="polite">
+    <span class="badge">Encontradas: <strong id="foundCount">0</strong>/<strong id="totalCount">0</strong></span>
+  </div>
 
-    <div class="panel" aria-label="Lista de palabras">
+  <!-- Juego -->
+  <main class="main">
+    <div class="grid" id="sopa" aria-label="Tablero de sopa de letras"></div>
+
+    <section class="panel" aria-label="Palabras objetivo">
       <div class="word-list" id="lista-palabras"></div>
-    </div>
+    </section>
   </main>
 
-  <!-- Popup -->
-  <section id="popup" aria-modal="true" role="dialog" aria-labelledby="popup-title" aria-describedby="popup-msg">
-    <div class="card">
-      <button class="close" id="popupClose" aria-label="Cerrar">✕</button>
-      <h2 class="title" id="popup-title">¡Palabra encontrada!</h2>
-      <p class="msg" id="popup-msg"></p>
+  <!-- Popup reflexión -->
+  <div class="popup" id="popup" role="dialog" aria-modal="true" aria-labelledby="popup-title">
+    <div class="popup-card">
+      <button class="close" id="popup-close" type="button" aria-label="Cerrar">✕</button>
+      <h2 class="title" id="popup-title"></h2>
+      <p class="content" id="popup-content"></p>
     </div>
-  </section>
+  </div>
 
   <script>
-    // === Configuración de la sopa ===
-    const tam = 12;
-    const grid = Array.from({ length: tam }, () => Array(tam).fill(""));
-    const palabras = [
-      { texto: "CONVIVENCIA",     reflexion: "La mejor celebración es la que se vive pacíficamente.", coords: [] },
-      { texto: "AMISTAD",         reflexion: "Compartir con respeto y cuidado fortalece la amistad.", coords: [] },
-      { texto: "CORRESPONSABILIDAD", reflexion: "El bienestar se construye cuidando de nosotros y de los demás.", coords: [] },
-      { texto: "UNION",           reflexion: "Celebremos en paz: sin violencia, sin drama, solo unión.", coords: [] },
-      { texto: "RESPETO",         reflexion: "Si hay golpe y agresión, se daña la celebración.", coords: [] },
-      { texto: "SOLIDARIDAD",     reflexion: "Ayudar y acompañar también es celebrar el amor y la amistad.", coords: [] },
-      { texto: "ALEGRIA",         reflexion: "Celebremos con alegría, responsabilidad y empatía en cada decisión.", coords: [] },
-      { texto: "EMOCION",         reflexion: "Gestiona tus emociones: evita las riñas, que el amor sea la celebración.", coords: [] },
-      { texto: "EMPATIA",         reflexion: "Celebrar con empatía: comprender y cuidar hace la fiesta más bonita.", coords: [] },
-      { texto: "AUTORREGULACION", reflexion: "Controla tus actos para que la celebración termine sin nada que lamentar.", coords: [] },
-      { texto: "AMOR",            reflexion: "Cuidar cómo celebramos es cuidar la vida de quienes amamos.", coords: [] },
+    // ===== Config =====
+    const TAM = 18; // 18x18 para que quepa CORRESPONSABILIDAD
+    const GRID = Array.from({ length: TAM }, () => Array(TAM).fill(""));
+    const letras = "ABCDEFGHIJKLMNÑOPQRSTUVWXYZ";
+
+    // Palabras + reflexiones (en mayúsculas, sin tildes)
+    const PALABRAS = [
+      { texto:"CONVIVENCIA",       reflexion:"La mejor celebración es la que se vive pacíficamente.", coords:[] },
+      { texto:"AMISTAD",           reflexion:"Compartir con respeto y cuidado fortalece la amistad.", coords:[] },
+      { texto:"CORRESPONSABILIDAD",reflexion:"El bienestar se construye cuidando de nosotros y de los demás.", coords:[] },
+      { texto:"UNION",             reflexion:"Celebremos en paz: sin violencia, sin drama, solo unión.", coords:[] },
+      { texto:"RESPETO",           reflexion:"Si hay golpe y agresión, se daña la celebración.", coords:[] },
+      { texto:"SOLIDARIDAD",       reflexion:"Ayudar y acompañar también es celebrar el amor y la amistad.", coords:[] },
+      { texto:"ALEGRIA",           reflexion:"Celebremos con alegría, responsabilidad y empatía en cada decisión.", coords:[] },
+      { texto:"EMOCION",           reflexion:"Gestiona tus emociones: evita las riñas, que el amor sea la celebración.", coords:[] },
+      { texto:"EMPATIA",           reflexion:"Celebrar con empatía: comprender y cuidar hace la fiesta más bonita.", coords:[] },
+      { texto:"AUTORREGULACION",   reflexion:"Controla tus actos para que la celebración termine sin nada que lamentar.", coords:[] },
+      { texto:"AMOR",              reflexion:"Cuidar cómo celebramos es cuidar la vida de quienes amamos.", coords:[] },
     ];
 
-    // 8 direcciones (incluye diagonales)
-    const direcciones = [
-      [0, 1], [1, 0], [1, 1], [-1, 1],
-      [0, -1], [-1, 0], [-1, -1], [1, -1]
+    const DIRECCIONES = [
+      [ 0, 1], [ 1, 0], [ 1, 1], [-1, 1],
+      [ 0,-1], [-1, 0], [-1,-1], [ 1,-1]
     ];
+
+    // ===== Utilidades =====
+    const $  = (sel, ctx=document) => ctx.querySelector(sel);
 
     function puedeColocar(palabra, row, col, dx, dy) {
-      for (let i = 0; i < palabra.length; i++) {
-        const r = row + i * dy;
-        const c = col + i * dx;
-        if (r < 0 || r >= tam || c < 0 || c >= tam || (grid[r][c] && grid[r][c] !== palabra[i])) return false;
+      for (let i=0; i<palabra.length; i++) {
+        const r = row + i*dy, c = col + i*dx;
+        if (r < 0 || r >= TAM || c < 0 || c >= TAM) return false;
+        if (GRID[r][c] && GRID[r][c] !== palabra[i]) return false;
       }
       return true;
     }
 
     function colocarPalabra(p) {
       let placed = false, intentos = 0;
-      while (!placed && intentos < 300) {
-        const [dx, dy] = direcciones[Math.floor(Math.random() * direcciones.length)];
-        const row = Math.floor(Math.random() * tam);
-        const col = Math.floor(Math.random() * tam);
-
+      while (!placed && intentos < 800) {
+        const [dx,dy] = DIRECCIONES[Math.floor(Math.random()*DIRECCIONES.length)];
+        const row = Math.floor(Math.random() * TAM);
+        const col = Math.floor(Math.random() * TAM);
         if (puedeColocar(p.texto, row, col, dx, dy)) {
-          const coords = [];
-          for (let i = 0; i < p.texto.length; i++) {
-            const r = row + i * dy;
-            const c = col + i * dx;
-            grid[r][c] = p.texto[i];
+          const coords=[];
+          for (let i=0; i<p.texto.length; i++) {
+            const r = row + i*dy, c = col + i*dx;
+            GRID[r][c] = p.texto[i];
             coords.push(`${r}-${c}`);
           }
           p.coords = coords;
@@ -270,155 +278,211 @@
         }
         intentos++;
       }
-      if (!placed) console.warn(`No se pudo colocar la palabra: ${p.texto}`);
+      if (!placed) console.warn(`No se pudo colocar: ${p.texto}`);
     }
 
     function rellenarLetras() {
-      const letras = "ABCDEFGHIJKLMNÑOPQRSTUVWXYZ";
-      for (let i = 0; i < tam; i++) {
-        for (let j = 0; j < tam; j++) {
-          if (!grid[i][j]) {
-            grid[i][j] = letras[Math.floor(Math.random() * letras.length)];
-          }
+      for (let r=0; r<TAM; r++) {
+        for (let c=0; c<TAM; c++) {
+          if (!GRID[r][c]) GRID[r][c] = letras[Math.floor(Math.random()*letras.length)];
         }
       }
     }
 
-    const sopa = document.getElementById("sopa");
-    const lista = document.getElementById("lista-palabras");
+    // ===== Render =====
+    const sopa   = $("#sopa");
+    const lista  = $("#lista-palabras");
+    const foundCountEl = $("#foundCount");
+    const totalCountEl = $("#totalCount");
 
-    function renderSopa() {
+    function renderSopa(){
       sopa.innerHTML = "";
-      for (let i = 0; i < tam; i++) {
-        for (let j = 0; j < tam; j++) {
+      for (let r=0; r<TAM; r++) {
+        for (let c=0; c<TAM; c++) {
           const div = document.createElement("div");
           div.className = "cell";
-          div.id = `${i}-${j}`;
-          div.setAttribute('role','gridcell');
-          div.textContent = grid[i][j];
+          div.id = `${r}-${c}`;
+          div.textContent = GRID[r][c];
           sopa.appendChild(div);
         }
       }
     }
 
-    function mostrarPalabras() {
+    function renderLista(){
       lista.innerHTML = "";
-      palabras.forEach(p => {
-        const span = document.createElement("span");
-        span.className = "word";
-        span.id = `palabra-${p.texto}`;
-        span.textContent = p.texto;
-        lista.appendChild(span);
+      PALABRAS.forEach(p=>{
+        const chip = document.createElement("span");
+        chip.className = "word";
+        chip.id = `palabra-${p.texto}`;
+        chip.textContent = p.texto;
+        lista.appendChild(chip);
       });
+      totalCountEl.textContent = PALABRAS.length;
     }
 
-    // ===== Selección (táctil y mouse) =====
+    // ===== Selección con “imán” =====
     let seleccion = [];
     let seleccionActiva = false;
+    let startId = null;
+    let endId = null;
 
-    function seleccionarCelda(el) {
-      el.classList.add("selected");
-      if (!seleccion.includes(el.id)) seleccion.push(el.id);
+    function idToRC(id){ const [r,c] = id.split('-').map(Number); return { r, c }; }
+
+    // Traza línea recta entre celdas (8 direcciones)
+    function lineCells(aId, bId){
+      if(!aId || !bId) return [];
+      let { r:r0, c:c0 } = idToRC(aId);
+      let { r:r1, c:c1 } = idToRC(bId);
+      const stepC = Math.sign(c1 - c0);
+      const stepR = Math.sign(r1 - r0);
+      const cells = [];
+      while(true){
+        cells.push(`${r0}-${c0}`);
+        if(r0 === r1 && c0 === c1) break;
+        r0 += stepR;
+        c0 += stepC;
+      }
+      return cells;
     }
 
-    function limpiarSeleccion() {
+    function seleccionarCelda(el){
+      el.classList.add("selected");
+      if(!seleccion.includes(el.id)) seleccion.push(el.id);
+      endId = el.id; // actualizamos fin
+    }
+
+    function limpiarSeleccion(){
       document.querySelectorAll(".cell.selected").forEach(c => c.classList.remove("selected"));
     }
 
-    function empezarSeleccion(e) {
+    function empezarSeleccion(e){
       seleccionActiva = true;
       seleccion = [];
       limpiarSeleccion();
-      const target = e.target.closest(".cell");
-      if (target) seleccionarCelda(target);
+      const t = e.target.closest(".cell");
+      if(t){
+        startId = t.id;
+        endId   = t.id;
+        seleccionarCelda(t);
+      }
     }
-    function arrastrarSeleccion(e) {
-      if (!seleccionActiva) return;
-      const target = e.target.closest(".cell");
-      if (target) seleccionarCelda(target);
+    function arrastrarSeleccion(e){
+      if(!seleccionActiva) return;
+      const t = e.target.closest(".cell");
+      if(t) seleccionarCelda(t);
     }
-    function empezarSeleccionTouch(e) {
+
+    function empezarSeleccionTouch(e){
       e.preventDefault();
       seleccionActiva = true;
       seleccion = [];
       limpiarSeleccion();
-      const touch = document.elementFromPoint(e.touches[0].clientX, e.touches[0].clientY);
-      if (touch && touch.classList.contains("cell")) seleccionarCelda(touch);
+      const t = document.elementFromPoint(e.touches[0].clientX, e.touches[0].clientY);
+      if(t && t.classList.contains("cell")){
+        startId = t.id;
+        endId   = t.id;
+        seleccionarCelda(t);
+      }
     }
-    function arrastrarSeleccionTouch(e) {
+    function arrastrarSeleccionTouch(e){
       e.preventDefault();
-      if (!seleccionActiva) return;
-      const touch = document.elementFromPoint(e.touches[0].clientX, e.touches[0].clientY);
-      if (touch && touch.classList.contains("cell")) seleccionarCelda(touch);
+      if(!seleccionActiva) return;
+      const t = document.elementFromPoint(e.touches[0].clientX, e.touches[0].clientY);
+      if(t && t.classList.contains("cell")) seleccionarCelda(t);
     }
 
-    // ===== Popup helpers =====
-    const popup = document.getElementById('popup');
-    const popupMsg = document.getElementById('popup-msg');
-    const popupClose = document.getElementById('popupClose');
-    function showPopup(htmlMsg){
-      popupMsg.innerHTML = htmlMsg;
-      popup.classList.add('show');
-    }
-    function hidePopup(){
-      popup.classList.remove('show');
-      popupMsg.innerHTML = '';
-    }
-    popupClose.addEventListener('click', hidePopup);
-    popup.addEventListener('click', (e)=>{ if(e.target === popup) hidePopup(); });
-
-    function finalizarSeleccion() {
+    function finalizarSeleccion(){
       seleccionActiva = false;
 
-      const texto = seleccion.map(id => document.getElementById(id).textContent).join("");
-      // Coincide directo en orden
-      let match = palabras.find(p => p.texto === texto && p.coords.every((c, i) => seleccion[i] === c));
+      // 1) “Imán”: línea entre inicio y fin
+      if(startId && endId){
+        const path = lineCells(startId, endId);
+        if(path.length){
+          const textoPath = path.map(id => document.getElementById(id).textContent).join("");
+          const textoRev  = [...textoPath].reverse().join("");
 
-      // También permitir al revés (arrastrar de derecha a izquierda / abajo-arriba)
-      if (!match) {
-        const textoRev = [...texto].reverse().join("");
-        const selRev = [...seleccion].reverse();
-        match = palabras.find(p => p.texto === textoRev && p.coords.every((c, i) => selRev[i] === c));
+          let match = PALABRAS.find(p => p.texto === textoPath);
+          if(!match) match = PALABRAS.find(p => p.texto === textoRev);
+
+          if(match){
+            path.forEach(id=>{
+              const cell = document.getElementById(id);
+              cell.classList.remove("selected"); cell.classList.add("found");
+            });
+            marcarEncontrada(match);
+            resetSeleccion();
+            return;
+          }
+        }
       }
 
-      if (match) {
-        // Marcar en grilla y lista
-        match.coords.forEach(id => {
+      // 2) Fallback exacto por celdas seleccionadas
+      const texto = seleccion.map(id => document.getElementById(id).textContent).join("");
+      let match = PALABRAS.find(p => p.texto === texto && p.coords.every((c, i) => seleccion[i] === c));
+      if (!match) {
+        const textoRev = [...texto].reverse().join("");
+        const selRev   = [...seleccion].reverse();
+        match = PALABRAS.find(p => p.texto === textoRev && p.coords.every((c, i) => selRev[i] === c));
+      }
+      if (match){
+        match.coords.forEach(id=>{
           const cell = document.getElementById(id);
-          cell.classList.remove("selected");
-          cell.classList.add("found");
+          cell.classList.remove("selected"); cell.classList.add("found");
         });
-        document.getElementById(`palabra-${match.texto}`).classList.add("found");
-
-        // Popup con palabra en magenta + reflexión
-        const palabraMagenta = `<span class="magenta">${match.texto}</span>`;
-        showPopup(`${palabraMagenta}<br>${match.reflexion}`);
+        marcarEncontrada(match);
       } else {
         limpiarSeleccion();
       }
-      seleccion = [];
+      resetSeleccion();
     }
 
+    function resetSeleccion(){
+      seleccion = []; startId = null; endId = null;
+    }
+
+    function marcarEncontrada(match){
+      const chip = document.getElementById(`palabra-${match.texto}`);
+      if(!chip.classList.contains("found")){
+        chip.classList.add("found");
+        // Actualiza HUD
+        const found = document.querySelectorAll('.word.found').length;
+        foundCountEl.textContent = found;
+      }
+      // Popup
+      const title = document.getElementById('popup-title');
+      const content = document.getElementById('popup-content');
+      title.innerHTML = `<span class="magenta">${match.texto}</span>`;
+      content.innerHTML = `<span class="magenta">${match.texto}</span><br>${match.reflexion}`;
+      showPopup();
+    }
+
+    // ===== Popup =====
+    const popup = $("#popup");
+    $("#popup-close").addEventListener("click", hidePopup);
+    popup.addEventListener("click", (e)=>{ if(e.target === popup) hidePopup(); });
+
+    function showPopup(){ popup.classList.add("show"); }
+    function hidePopup(){ popup.classList.remove("show"); }
+
+    // ===== Init =====
+    // Colocar palabras, rellenar, render, eventos
+    PALABRAS.forEach(p => colocarPalabra(p));
+    rellenarLetras();
+    renderSopa();
+    renderLista();
+
     // Eventos
-    function iniciarEventos() {
+    function iniciarEventos(){
       sopa.addEventListener("mousedown", empezarSeleccion);
       sopa.addEventListener("mousemove", arrastrarSeleccion);
       window.addEventListener("mouseup", finalizarSeleccion);
 
-      sopa.addEventListener("touchstart", empezarSeleccionTouch, { passive: false });
-      sopa.addEventListener("touchmove", arrastrarSeleccionTouch,   { passive: false });
+      sopa.addEventListener("touchstart", empezarSeleccionTouch, { passive:false });
+      sopa.addEventListener("touchmove",  arrastrarSeleccionTouch, { passive:false });
       window.addEventListener("touchend", finalizarSeleccion);
     }
-
-    // Init
-    palabras.forEach(p => colocarPalabra(p));
-    rellenarLetras();
-    renderSopa();
-    mostrarPalabras();
     iniciarEventos();
   </script>
 </body>
 </html>
-
-
 
